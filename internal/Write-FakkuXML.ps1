@@ -4,11 +4,11 @@ function Write-FakkuXML {
                 [Parameter(Mandatory = $true)]
                 [string]$WebRequest,
                 [Parameter(Mandatory = $true)]
-                [System.IO.FileInfo]$XMLPath,
-                [Parameter()]
-                [String]$Genres
+                [System.IO.FileInfo]$XMLPath
         )
 
+        $Title = Get-FakkuTitle -Webrequest $WebRequest
+        $Series = Get-FakkuSeries -WebRequest $WebRequest
         $Summary = Get-FakkuSummary -WebRequest $WebRequest
         $Artist = Get-FakkuArtist -WebRequest $WebRequest
         $Publisher = Get-FakkuPublisher -WebRequest $WebRequest

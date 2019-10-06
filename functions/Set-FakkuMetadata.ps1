@@ -12,7 +12,7 @@ function Set-FakkuMetadata {
                 $FakkuUrl = Get-FakkuURL -DoujinName $File.BaseName
                 try {
                         $WebRequest = Invoke-WebRequest -Uri $FakkuUrl -Method Get
-                        Write-FakkuXML -WebRequest $WebRequest
+                        Write-FakkuXML -WebRequest $WebRequest -XMLPath (Join-Path -Path $FilePath -ChildPath 'ComicInfo.xml')
                 }
                 catch {
                         Write-Error ""$File.BaseName" not found on Fakku"
