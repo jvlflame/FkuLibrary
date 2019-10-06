@@ -2,10 +2,12 @@ function Get-LocalFakkuFiles {
         [CmdletBinding()]
         param(
                 [Parameter(Mandatory = $true)]
-                [System.IO.FileInfo]$FilePath
+                [System.IO.FileInfo]$FilePath,
+                [Parameter(Mandatory = $false)]
+                [Switch]$Recurse
         )
         
-        $LocalFakkuFiles = Get-ChildItem -Path $FilePath | Where-Object { 
+        $LocalFakkuFiles = Get-ChildItem -Path $FilePath -Recurse:$Recurse | Where-Object { 
                 $_.Name -like '*.zip'`
                         -or $_.Name -like '*.cbz'`
                         -or $_.Name -like '*.rar'`
