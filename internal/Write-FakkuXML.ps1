@@ -13,6 +13,7 @@ function Write-FakkuXML {
         $Artist = Get-FakkuArtist -WebRequest $WebRequest
         $Publisher = Get-FakkuPublisher -WebRequest $WebRequest
         $Genres = Get-FakkuGenres -WebRequest $WebRequest
+        $Parody = Get-FakkuParody -WebRequest $WebRequest
         Set-Content -LiteralPath $XMLPath -Value '<?xml version="1.0"?>' -Force
         
         $Content = @(
@@ -23,6 +24,7 @@ function Write-FakkuXML {
                 "  <Writer>$Artist</Writer>"
                 "  <Publisher>$Publisher</Publisher>"
                 "  <Genre>$Genres</Genre>"
+                "  <Tags>$Parody</Tags>"
                 "  <LanguageISO>en</LanguageISO>"
                 "  <AgeRating>Adults Only 18+</AgeRating>"
                 "  <Manga>Yes</Manga>"
