@@ -7,14 +7,11 @@ function Set-FakkuMetadata {
                 [Switch]$Recurse
         )
 
-        
         foreach ($File in (Get-LocalFakkuFiles -FilePath $FilePath -Recurse:$Recurse)) {
-                $FakkuUrl = Get-FakkuURL -DoujinName $File.Name
+                $FakkuUrl = Get-FakkuURL -DoujinName $File.BaseName
                 Try {
                         $WebRequest = Invoke-WebRequest -Uri $FakkuUrl -Method Get
                         $XMLPath = Join-Path -Path $FilePath -ChildPath 'ComicInfo.xml'
-                        Write-Host "XML Path: $XMLPath"
-                        Write-Host "Destination Path: $DestinationPath"
                         Write-FakkuXML -WebRequest $WebRequest.Content -XMLPath $XMLPath
 
                         # Temporarily rename files to bypass PowerShell path errors 
@@ -33,5 +30,7 @@ function Set-FakkuMetadata {
                         $DoujinName = $File.BaseName
                         Write-Warning "Could not find '$DoujinName' on Fakku. Check filename to make sure it follows the approved schema."
                 }
+
+                Start-Sleep -Seconds 1
         }
 }
