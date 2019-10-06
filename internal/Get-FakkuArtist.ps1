@@ -6,11 +6,8 @@ function Get-FakkuArtist {
         )
 
         $WebContent = $WebRequest.Content
-        $RawArtist = ((((($WebContent -split '<div class=\"row-left\">Artist<\/div>')[1])`
-                                        -split '\/artists\/(.*)\">')[1])`
-                        -split '<\/a>')[0]
+        $Artist = ((($WebContent -split '<div class=\"row-right\"><a href=\"\/artists\/(.*?)\">')[2])`
+                        -split '<\/a><\/div>')[0]
         
-        $TextInfo = (Get-Culture).TextInfo
-        $Artist = ($TextInfo.ToTitleCase($RawArtist)) -replace '-', ' '
         Write-Output $Artist
 }
