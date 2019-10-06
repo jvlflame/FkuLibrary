@@ -2,10 +2,10 @@ function Get-FakkuArtist {
         [CmdletBinding()]
         param(
                 [Parameter(Mandatory = $true)]
-                [string]$WebRequest
+                [String]$WebRequest
         )
 
-        $WebContent = $WebRequest.Content
+        $WebContent = $WebRequest
         $Artist = ((($WebContent -split '<div class=\"row-right\"><a href=\"\/artists\/(.*?)\">')[2])`
                         -split '<\/a><\/div>')[0]
         

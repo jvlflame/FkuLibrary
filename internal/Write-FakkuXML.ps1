@@ -2,7 +2,7 @@ function Write-FakkuXML {
         [CmdletBinding()]
         param(
                 [Parameter(Mandatory = $true)]
-                [string]$WebRequest,
+                [String]$WebRequest,
                 [Parameter(Mandatory = $true)]
                 [System.IO.FileInfo]$XMLPath
         )
@@ -14,7 +14,7 @@ function Write-FakkuXML {
         $Publisher = Get-FakkuPublisher -WebRequest $WebRequest
         $Genres = Get-FakkuGenres -WebRequest $WebRequest
         Set-Content -LiteralPath $XMLPath -Value '<?xml version="1.0"?>' -Force
-
+        
         $Content = @(
                 '<ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
                 "  <Title>$Title</Title>"

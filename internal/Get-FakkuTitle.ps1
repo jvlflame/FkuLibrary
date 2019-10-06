@@ -2,10 +2,10 @@ function Get-FakkuTitle {
         [CmdletBinding()]
         param(
                 [Parameter(Mandatory = $true)]
-                [string]$WebRequest
+                [String]$WebRequest
         )
 
-        $WebContent = $WebRequest.Content
+        $WebContent = $WebRequest
         $Title = ((((($WebContent -split '<div class=\"content-name\">')[1])`
                                         -split '<h1>')[1])`
                         -split '<\/h1>')[0]

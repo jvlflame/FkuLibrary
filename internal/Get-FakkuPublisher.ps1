@@ -2,10 +2,12 @@ function Get-FakkuPublisher {
         [CmdletBinding()]
         param(
                 [Parameter(Mandatory = $true)]
-                [string]$WebRequest
+                [String]$WebRequest
         )
 
-        $RawPublisher = $WebRequest.Links.href | Where-Object { $_ -like '/publishers*' }
-        $Publisher = ($RawPublisher -split 'publishers\/')[1]
+        $WebContent = $WebRequest
+        $Publisher = ((($WebContent -split '<div class=\"row-right\"><a href=\"\/publishers\/(.*?)\">')[2])`
+                        -split '<\/a><\/div>')[0]
+
         Write-Output $Publisher
 }

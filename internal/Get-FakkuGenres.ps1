@@ -2,10 +2,10 @@ function Get-FakkuGenres {
         [CmdletBinding()]
         param(
                 [Parameter(Mandatory = $true)]
-                [string]$WebRequest
+                [String]$WebRequest
         )
         
-        $WebContent = $WebRequest.Content
+        $WebContent = $WebRequest
         $RawGenres = (((($WebContent -split '<div class=\"row-right tags\">')[1])`
                                 -split '<a class=\"js-suggest-tag')[0])`
                 -split '\">(.*?)<\/a>'

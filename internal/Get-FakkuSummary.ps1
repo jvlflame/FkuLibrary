@@ -2,10 +2,10 @@ function Get-FakkuSummary {
         [CmdletBinding()]
         param(
                 [Parameter(Mandatory = $true)]
-                [string]$WebRequest
+                [String]$WebRequest
         )
 
-        $WebContent = $WebRequest.Content
+        $WebContent = $WebRequest
         $RawSummary = ((((($WebContent -split '<div class=\"row-left\">Description<\/div>')[1])`
                                         -split 'row-limit\">')[1])`
                         -split '<\/div>')[0]

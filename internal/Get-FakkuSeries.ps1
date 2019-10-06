@@ -2,10 +2,10 @@ function Get-FakkuSeries {
         [CmdletBinding()]
         param(
                 [Parameter(Mandatory = $true)]
-                [string]$WebRequest
+                [String]$WebRequest
         )
 
-        $WebContent = $WebRequest.Content
+        $WebContent = $WebRequest
         $Series = ((($WebContent -split '<div class=\"row-right\"><a href=\"\/magazines\/(.*?)\">')[2])`
                         -split '<\/a><\/div>')[0]
 
