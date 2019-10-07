@@ -19,15 +19,23 @@ function Get-PandaChaikaGenres {
                 [String]$WebRequest
         )
 
-        $RawGenres = $WebRequest | Where-Object { $_ -like '/tag/*' -and `
+        $WebContent = $WebRequest
+        $RawGenres = (((((((($WebContent -split '<a href=\"\/tag\/publisher:(.*?)\/\">')[2])`
+                                                                -split '<li>')[1])`
+                                                -split '<\/li>')[0])`
+                                -split '<a href=\"\/tag\/(.*?)\/">')`
+                        -split '<\/a>').Trim() | Select-Object -Unique | Where-Object { $_ -notlike '' }
+
+        <# $RawGenres = $WebRequest | Where-Object { $_ -like '/tag/*' -and `
                         $_ -notlike '/tag/language*' -and `
                         $_ -notlike '/tag/artist*' -and `
                         $_ -notlike '/tag/magazine*' -and `
-                        $_ -notlike '/tag/publisher*' }
+                        $_ -notlike '/tag/publisher*' } #>
 
         # Formats the genres as a comma-delimited string "Genre1, Genre2, etc." which is accepted by ComicInfo.xml format
-        $GenreString = ((($RawGenres -split '\/tag\/') -split '\/') | Where-Object { $_ -ne '' }) -join ', '
-        
+        # $GenreString = ((($RawGenres -split '\/tag\/') -split '\/') | Where-Object { $_ -ne '' }) -join ', '
+
+        $GenreString = $RawGenres -join ', '
         Write-Output $GenreString
 }
 

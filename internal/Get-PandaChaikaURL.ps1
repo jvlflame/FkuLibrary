@@ -14,7 +14,8 @@ function Get-PandaChaikaURL {
                                                 -split '\(')[0]).Trim())`
                         -replace ' ', '+'
 
-                $SearchURL = "https://panda.chaika.moe/search/?qsearch=$Artist+$Title"
+                
+                $SearchURL = "https://panda.chaika.moe/search/?title=$Title&tags=artist%3A$Artist"
         }
 
         # Match "[Artist] FileName.ext"
@@ -23,22 +24,27 @@ function Get-PandaChaikaURL {
                 $Title = ((($DoujinName -split '\[(.*)\]')[2]).Trim())`
                         -replace ' ', '+'
 
-                $SearchURL = "https://panda.chaika.moe/search/?qsearch=$Artist+$Title"
+                $SearchURL = "https://panda.chaika.moe/search/?title=$Title&tags=artist%3A$Artist"
         }
 
         # Match "FileName.ext"
         elseif ($DoujinName -match '^[a-zA-Z0-9]') {
                 $Artist = ''
                 $Title = ($DoujinName.Trim()) -replace ' ', '+'
-                $SearchURL = "https://panda.chaika.moe/search/?qsearch=$Title"
+                $SearchURL = "https://panda.chaika.moe/search/?title=$Title"
         }
-        Write-Host $SearchURL
         $SearchPage = Invoke-WebRequest -Uri $SearchURL -Method Get
-        $PageCheck = $SearchPage.Links | Where-Object { $_.href -like '/PandaChaika/*' }
-        
+        $PageCheck = $SearchPage.Links.href | Where-Object { $_ -like '/archive/*' }
         if ($null -ne $PageCheck) {
-                $PandaChaikaID = $PageCheck.href
-                $PandaChaikaUrl = "https://panda.chaika.moe/$PandaChaikaID"
+                if ($PageCheck.Count -ge 2) {
+                        $PandaChaikaID = $PageCheck[0]
+                }
+
+                else {
+                        $PandaChaikaID = $PageCheck
+                }
+
+                $PandaChaikaUrl = "https://panda.chaika.moe$PandaChaikaID"
         }
 
         Write-Output $PandaChaikaUrl

@@ -7,7 +7,7 @@ function Get-LocalArchives {
                 [Switch]$Recurse
         )
         
-        $LocalFakkuFiles = Get-ChildItem -Path $FilePath -Recurse:$Recurse | Where-Object { 
+        $LocalArchives = Get-ChildItem -Path $FilePath -Recurse:$Recurse | Where-Object { 
                 $_.Name -like '*.zip'`
                         -or $_.Name -like '*.cbz'`
                         -or $_.Name -like '*.rar'`
