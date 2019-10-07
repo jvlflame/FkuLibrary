@@ -1,8 +1,15 @@
-## Fakku-Library
+# Fakku-Library
 
-Build your own local Fakku manga library
+Scrape Fakku metadata and build a local Fakku manga library with ComicRack (or Ubooquity).
 
-Authored by jvlflame
+`Set-FakkuMetadata.ps1` will write a `ComicInfo.xml` metadata file directly into your manga archive
+(.zip, .cbz, .cbr, .rar, .7z, .cb7).
 
-Details of how to create a Module in this way can be found here
-https://sqldbawithabeard.com/2017/11/09/using-plaster-to-create-a-new-powershell-module/
+## Demo
+
+![Demo](/other/demo.jpg)
+
+## Usage
+
+1. `Import-Module Fakku-Library.psm1`
+2. `Set-FakkuMetadata -FilePath "C:\Path\to\files\"`
