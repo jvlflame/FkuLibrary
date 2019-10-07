@@ -1,5 +1,8 @@
 # Fakku-Library
 
+[![Last commit](https://img.shields.io/github/last-commit/jvlflame/Fakku-Library?style=flat-square)](https://github.com/jvlflame/Fakku-Library/commits/master)
+[![Discord](https://img.shields.io/discord/608449512352120834?style=flat-square)](https://discord.gg/K2Yjevk)
+
 ## **DISCLAIMER: This project is still in it's very early stages and may be prone to large or breaking changes. Use at your own risk.**
 
 Scrape Fakku metadata and build your own local Fakku manga library with ComicRack (or Ubooquity).
@@ -31,25 +34,61 @@ supporting filetypes: .zip, .cbz, .rar, .cbr, .7z, and .cb7.
 </ComicInfo>
 ```
 
-## Usage
+## Table of Contents:
 
-On PowerShell 5.0+ run the following commands
+- [Getting Started](#Getting-Started)
+- [Usage](#Usage)
 
-1. Import the module
+## Getting Started
+
+### Prerequisites
+
+- [PowerShell 5.0 or higher (6.0+ recommended)](<(https://github.com/PowerShell/PowerShell)>)
+- ComicRack, Ubooquity, or any other CMS that supports `ComicInfo.xml` metadata
+
+### Installing
+
+[Clone the repository](https://github.com/jvlflame/Fakku-Library/archive/master.zip)
+
+#### Import the module
+
+You will need to do this every time you close your PowerShell window unless you add the module to
+your PowerShell module PATH
 
 ```
 Import-Module Fakku-Library.psm1
 ```
 
-2. Set metadata for your Fakku archives
+#### Accepted archive filenames
 
 ```
-# Set metadata for archives in specified filepath
+[Author] Manga Title (Comic XXX).ext
+
+Manga Title (Comic XXX).ext
+
+Manga Title.ext
+```
+
+## Usage
+
+To run the module, use PowerShell 5.0 or higher.
+
+### Examples
+
+#### Set metadata for archives in specified filepath
+
+```
 Set-FakkuMetadata -FilePath "C:\path\to\files\"
+```
 
-# Set metadata for archives in specified filepath recursively
+#### Set metadata for archives in specified filepath recursively
+
+```
 Set-FakkuMetadata -FilePath "C:\path\to\files\" -Recurse
+```
 
-# Set metadata for a single archive
+#### Set metadata for a single archive
+
+```
 Set-FakkuMetadata -FilePath "C:\path\to\file\file.cbz"
 ```
