@@ -21,7 +21,8 @@ function Set-FakkuMetadata {
                 $FileName = $File.FullName
                 $DoujinName = $File.BaseName
                 $XMLPath = Join-Path -Path $File.DirectoryName -ChildPath 'ComicInfo.xml'
-                Write-Host "($Index of $TotalIndex) Setting metadata for $FileName"
+                Write-Host "($Index of $TotalIndex) Setting metadata for $DoujinName"
+
                 Try {
                         $WebRequest = Invoke-WebRequest -Uri $FakkuUrl -Method Get
                         Write-MetadataXML -WebRequest $WebRequest.Content -XMLPath $XMLPath -Fakku
@@ -40,15 +41,16 @@ function Set-FakkuMetadata {
 
                         Catch {
                                 Write-Warning "Could not find metadata for $FileName. Skipping..."
+                                #Write-Error | Out-File -FilePath (Join-Path -Path ../$PSScriptRoot -ChildPath 'log.txt') -NoClobber -Append
                         }
                 }
 
                 Catch [System.Net.WebException] {
-                        Write-Warning "Could not access '$DoujinName' on Fakku. Manga is inaccessible without authentication."
+                        Write-Host "Could not find '$DoujinName' on Fakku. Manga is inaccessible without authentication."
                 }
 
                 $Index++
-                Start-Sleep -Seconds 1
+                # Start-Sleep -Seconds 1
         }
         Write-Host "Complete!"
 }
