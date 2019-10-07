@@ -19,11 +19,24 @@ function Get-PandaChaikaGenres {
                 [String]$WebRequest
         )
 
-        $RawGenres = (((((((($WebRequest -split '<a href=\"\/tag\/publisher:(.*?)\/\">')[2])`
-                                                                -split '<li>')[1])`
-                                                -split '<\/li>')[0])`
-                                -split '<a href=\"\/tag\/(.*?)\/">')`
-                        -split '<\/a>').Trim() | Select-Object -Unique | Where-Object { $_ -notlike '' }
+        if ($WebRequest -match '<a href=\"\/tag\/publisher:(.*?)\/\">') {
+                $RawGenres = (((((((((($WebRequest -split '<a href=\"\/tag\/publisher:(.*?)\/\">')[2])`
+                                                                                        -split '<li>')[1])`
+                                                                        -split '<\/li>')[0])`
+                                                        -split '<a href=\"\/tag\/(.*?)\/">')`
+                                                -split '<\/a>').Trim())`
+                                -replace '_', ' ') | Select-Object -Unique | Where-Object { $_ -notlike '' }
+        }
+
+        else {
+                $RawGenres = (((((((((($WebRequest -split '<a href=\"\/tag\/artist:(.*?)\/">')[2])`
+                                                                                        -split '<li>')[1])`
+                                                                        -split '<\/li>')[0])`
+                                                        -split '<a href=\"\/tag\/(.*?)\/">')`
+                                                -split '<\/a>').Trim())`
+                                -replace '_', ' ') | Select-Object -Unique | Where-Object { $_ -notlike '' }
+
+        }
 
         <# $RawGenres = $WebRequest | Where-Object { $_ -like '/tag/*' -and `
                         $_ -notlike '/tag/language*' -and `
@@ -62,11 +75,14 @@ function Get-PandaChaikaSeries {
 
         $TextInfo = (Get-Culture).TextInfo
         $RawSeries = ((((($WebRequest -split '<a href=\"\/tag\/magazine:(.*?)\/\">')[1])`
-                                -split '<\/a><\/div>')[0])`
-                                -replace '%23', '#')`
+                                        -split '<\/a><\/div>')[0])`
+                        -replace '%23', '#')`
                 -replace '_', ' '
         
         $Series = $TextInfo.ToTitleCase($RawSeries)
+        if ($null -eq $Series -or $Series -eq '') {
+                $Series = "Unknown"
+        }
         Write-Output $Series
 }
 

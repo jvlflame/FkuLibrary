@@ -16,7 +16,6 @@ function Get-PandaChaikaURL {
                                         -replace '#', '%23')`
                                 -replace ' ', '+').ToLower()
 
-                
                 $SearchURL = "https://panda.chaika.moe/search/?title=$Title&tags=artist%3A$Artist"
         }
 
@@ -35,7 +34,7 @@ function Get-PandaChaikaURL {
                 $Artist = ''
                 $Title = ((($DoujinName.Trim()) -replace "#", '%23')`
                                 -replace ' ', '+').ToLower()
-                                
+
                 $SearchURL = "https://panda.chaika.moe/search/?title=$Title"
         }
         
