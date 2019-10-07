@@ -3,7 +3,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/jvlflame/Fakku-Library?style=flat-square)](https://github.com/jvlflame/Fakku-Library/commits/master)
 [![Discord](https://img.shields.io/discord/608449512352120834?style=flat-square)](https://discord.gg/K2Yjevk)
 
-## **DISCLAIMER: This project is still in it's very early stages and may be prone to large or breaking changes. Use at your own risk.**
+## **DISCLAIMER: This project is still in its early stages and may be prone to breaking changes. Use at your own risk.**
 
 Scrape Fakku metadata and build your own local Fakku manga library with ComicRack (or Ubooquity).
 Currently supports scraping directly from `Fakku.net`, with failover to `panda.chaika.moe`.
