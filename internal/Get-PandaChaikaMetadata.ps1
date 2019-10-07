@@ -5,10 +5,10 @@ function Get-PandaChaikaArtist {
                 [String]$WebRequest
         )
 
-        $WebContent = $WebRequest
-        $Artist = ((($WebContent -split '<a href=\"\/tag\/artist:(.*?)\/\">')[1])`
-                        -split '<\/a>')[0]
-        
+        $TextInfo = (Get-Culture).TextInfo
+        $RawArtist = (((($WebRequest -split '<a href=\"\/tag\/artist:(.*?)\/\">')[1])`
+                                -split '<\/a>')[0]) -replace '_', ' '
+        $Artist = $TextInfo.ToTitleCase($RawArtist)
         Write-Output $Artist
 }
 
@@ -19,8 +19,7 @@ function Get-PandaChaikaGenres {
                 [String]$WebRequest
         )
 
-        $WebContent = $WebRequest
-        $RawGenres = (((((((($WebContent -split '<a href=\"\/tag\/publisher:(.*?)\/\">')[2])`
+        $RawGenres = (((((((($WebRequest -split '<a href=\"\/tag\/publisher:(.*?)\/\">')[2])`
                                                                 -split '<li>')[1])`
                                                 -split '<\/li>')[0])`
                                 -split '<a href=\"\/tag\/(.*?)\/">')`
@@ -46,9 +45,8 @@ function Get-PandaChaikaPublisher {
                 [String]$WebRequest
         )
 
-        $WebContent = $WebRequest
         $TextInfo = (Get-Culture).TextInfo
-        $RawPublisher = ((($WebContent -split '<a href=\"\/tag\/publisher:(.*?)\/\">')[1])`
+        $RawPublisher = ((($WebRequest -split '<a href=\"\/tag\/publisher:(.*?)\/\">')[1])`
                         -split '<\/a>')[0]
 
         $Publisher = $TextInfo.ToTitleCase($RawPublisher)
@@ -62,9 +60,8 @@ function Get-PandaChaikaSeries {
                 [String]$WebRequest
         )
 
-        $WebContent = $WebRequest
         $TextInfo = (Get-Culture).TextInfo
-        $RawSeries = (((($WebContent -split '<a href=\"\/tag\/magazine:(.*?)\/\">')[1])`
+        $RawSeries = (((($WebRequest -split '<a href=\"\/tag\/magazine:(.*?)\/\">')[1])`
                                 -split '<\/a><\/div>')[0])`
                 -replace '_', ' '
         
@@ -79,8 +76,7 @@ function Get-PandaChaikaSummary {
                 [String]$WebRequest
         )
 
-        $WebContent = $WebRequest
-        $Summary = ((((($WebContent -split '<th>Description</th>')[1])`
+        $Summary = ((((($WebRequest -split '<th>Description</th>')[1])`
                                         -split '<td>')[1])`
                         -split '<\/td>')[0]
         
@@ -94,8 +90,7 @@ function Get-PandaChaikaTitle {
                 [String]$WebRequest
         )
 
-        $WebContent = $WebRequest
-        $Title = (((($WebContent -split '<title>')[1])`
+        $Title = (((($WebRequest -split '<title>')[1])`
                                 -split '\|')[0]).Trim()
         
         Write-Output $Title

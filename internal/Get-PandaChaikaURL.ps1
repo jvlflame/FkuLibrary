@@ -6,7 +6,7 @@ function Get-PandaChaikaURL {
         )
 
         $ProgressPreference = 'SilentlyContinue'
-        $DoujinName = $DoujinName -replace '\p{S} ', ''
+        $DoujinName = $DoujinName -replace '\p{S} ', 'bzb'
 
         # Match "[Artist] FileName (Comic XXX).ext"
         if ($DoujinName -match '^\[(.*?)\](.*?)\((.*?)\)') {
