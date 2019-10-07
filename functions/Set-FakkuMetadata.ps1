@@ -1,22 +1,26 @@
 function Set-FakkuMetadata {
         [CmdletBinding()]
         param(
-                [Parameter(Mandatory = $true)]
+                [Parameter(Mandatory = $true, Position = 1)]
                 [System.IO.FileInfo]$FilePath,
                 [Parameter(Mandatory = $false)]
                 [Switch]$Recurse
         )
 
         $ProgressPreference = 'SilentlyContinue'
-        Write-Host "Starting Fakku metadata scraper"
-        $LocalArchives = Get-LocalArchives -FilePath $FilePath -Recurse:$Recurse
+        Write-Host "Starting Fakku metadata scraper on path: $FilePath"
+        
+        # Check if FilePath is a directory or file to determine how to proceed
+        if ((Get-Item -Path $FilePath) -is [System.IO.DirectoryInfo]) { $Archive = Get-LocalArchives -FilePath $FilePath -Recurse:$Recurse }
+        else { $Archive = Get-Item $FilePath }
+
         $Index = 1
-        $TotalIndex = $LocalArchives.Count
-        foreach ($File in $LocalArchives) {
+        $TotalIndex = $Archive.Count
+        foreach ($File in $Archive) {
                 $FakkuUrl = Get-FakkuURL -DoujinName $File.BaseName
                 $FileName = $File.FullName
                 $DoujinName = $File.BaseName
-                $XMLPath = Join-Path -Path $FilePath -ChildPath 'ComicInfo.xml'
+                $XMLPath = Join-Path -Path $File.DirectoryName -ChildPath 'ComicInfo.xml'
                 Write-Host "($Index of $TotalIndex) Setting metadata for $FileName"
                 Try {
                         $WebRequest = Invoke-WebRequest -Uri $FakkuUrl -Method Get
