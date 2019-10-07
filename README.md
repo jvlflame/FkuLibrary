@@ -1,8 +1,12 @@
 # Fakku-Library
 
-Scrape Fakku metadata and build a local Fakku manga library with ComicRack (or Ubooquity).
+## **DISCLAIMER: This project is still in it's very early stages and may be prone to large or breaking changes. Use at your own risk.**
 
-`Set-FakkuMetadata.ps1` will write a `ComicInfo.xml` metadata file directly into your manga archive
+Scrape Fakku metadata and build your own local Fakku manga library with ComicRack (or Ubooquity).
+Currently supports scraping directly from `Fakku.net`, with failover to `panda.chaika.moe`.
+
+`Set-FakkuMetadata` will write a `ComicInfo.xml` metadata file directly into your manga archive,
+supporting filetypes: .zip, .cbz, .rar, .cbr, .7z, and .cb7.
 
 ## Demo
 
