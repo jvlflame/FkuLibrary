@@ -61,8 +61,9 @@ function Get-PandaChaikaSeries {
         )
 
         $TextInfo = (Get-Culture).TextInfo
-        $RawSeries = (((($WebRequest -split '<a href=\"\/tag\/magazine:(.*?)\/\">')[1])`
+        $RawSeries = ((((($WebRequest -split '<a href=\"\/tag\/magazine:(.*?)\/\">')[1])`
                                 -split '<\/a><\/div>')[0])`
+                                -replace '%23', '#')`
                 -replace '_', ' '
         
         $Series = $TextInfo.ToTitleCase($RawSeries)
