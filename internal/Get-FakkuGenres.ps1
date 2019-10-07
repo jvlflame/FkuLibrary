@@ -5,8 +5,7 @@ function Get-FakkuGenres {
                 [String]$WebRequest
         )
         
-        $WebContent = $WebRequest
-        $RawGenres = (((($WebContent -split '<div class=\"row-right tags\">')[1])`
+        $RawGenres = (((($WebRequest -split '<div class=\"row-right tags\">')[1])`
                                 -split '<a class=\"js-suggest-tag')[0])`
                 -split '\">(.*?)<\/a>'
         

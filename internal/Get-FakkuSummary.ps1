@@ -5,8 +5,7 @@ function Get-FakkuSummary {
                 [String]$WebRequest
         )
 
-        $WebContent = $WebRequest
-        $RawSummary = ((((($WebContent -split '<div class=\"row-left\">Description<\/div>')[1])`
+        $RawSummary = ((((($WebRequest -split '<div class=\"row-left\">Description<\/div>')[1])`
                                         -split 'row-limit\">')[1])`
                         -split '<\/div>')[0]
 
