@@ -46,19 +46,6 @@ supporting filetypes: .zip, .cbz, .rar, .cbr, .7z, and .cb7.
 - [PowerShell 5.0 or higher (6.0+ recommended)](<(https://github.com/PowerShell/PowerShell)>)
 - ComicRack, Ubooquity, or any other CMS that supports `ComicInfo.xml` metadata
 
-### Installing
-
-[Clone the repository](https://github.com/jvlflame/Fakku-Library/archive/master.zip)
-
-#### Import the module
-
-You will need to do this every time you close your PowerShell window unless you add the module to
-your PowerShell module PATH
-
-```
-Import-Module Fakku-Library.psm1
-```
-
 #### Accepted archive filenames
 
 ```
@@ -67,6 +54,20 @@ Import-Module Fakku-Library.psm1
 Manga Title (Comic XXX).ext
 
 Manga Title.ext
+```
+
+### Installing
+
+[Clone the repository](https://github.com/jvlflame/Fakku-Library/archive/master.zip) and extract the
+files to a directory of your choice.
+
+#### Import the module
+
+You will need to do this every time you close your PowerShell window unless you add the module to
+your PowerShell module PATH
+
+```
+Import-Module Fakku-Library.psm1
 ```
 
 ## Usage
