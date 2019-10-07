@@ -1,4 +1,4 @@
-function Get-LocalFakkuFiles {
+function Get-LocalArchives {
         [CmdletBinding()]
         param(
                 [Parameter(Mandatory = $true)]
@@ -16,5 +16,5 @@ function Get-LocalFakkuFiles {
                         -or $_.Name -like '*.cb7' 
         }
     
-        Write-Output $LocalFakkuFiles
+        Write-Output $LocalArchives
 }
