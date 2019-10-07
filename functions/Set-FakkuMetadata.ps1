@@ -7,9 +7,12 @@ function Set-FakkuMetadata {
                 [Switch]$Recurse
         )
 
-        foreach ($File in (Get-LocalFakkuFiles -FilePath $FilePath -Recurse:$Recurse)) {
+        $ProgressPreference = 'SilentlyContinue'
+
+        foreach ($File in (Get-LocalArchives -FilePath $FilePath -Recurse:$Recurse)) {
                 $FakkuUrl = Get-FakkuURL -DoujinName $File.BaseName
                 $DoujinName = $File.BaseName
+
                 Try {
                         $WebRequest = Invoke-WebRequest -Uri $FakkuUrl -Method Get
                         $XMLPath = Join-Path -Path $FilePath -ChildPath 'ComicInfo.xml'
@@ -19,7 +22,6 @@ function Set-FakkuMetadata {
 
                 Catch [Microsoft.PowerShell.Commands.HttpResponseException] {
                         Write-Warning "Could not find '$DoujinName' on Fakku. Manga may not exist on Fakku, the filename does not follow the approved schemas, or may be inaccessible without authentication."
-                        Get-PandaChaikaMetadata -DoujinName $DoujinName
                 }
 
                 Catch [System.Net.WebException] {
