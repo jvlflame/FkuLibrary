@@ -6,9 +6,9 @@ function Get-FakkuSeries {
         )
 
         $TextInfo = (Get-Culture).TextInfo
-        $RawSeries = ((($WebRequest -split '<div class=\"row-right\"><a href=\"\/magazines\/(.*?)\">')[2])`
-                        -split '<\/a><\/div>')[0]
-        
-        $Series = $TextInfo.ToTitleCase($RawSeries)
+        $rawSeries = (((($WebRequest -split '<div class=\"row-right\"><a href=\"\/magazines\/(.*?)\">')[2])`
+                                -split '<\/a><\/div>')[0]).Trim()
+
+        $Series = $TextInfo.ToTitleCase($rawSeries)
         Write-Output $Series
 }

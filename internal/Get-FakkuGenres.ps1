@@ -4,13 +4,17 @@ function Get-FakkuGenres {
                 [Parameter(Mandatory = $true)]
                 [String]$WebRequest
         )
-        
-        $RawGenres = (((($WebRequest -split '<div class=\"row-right tags\">')[1])`
-                                -split '<a class=\"js-suggest-tag')[0])`
-                -split '\">(.*?)<\/a>'
-        
-        $Genres = ($RawGenres -notmatch '<a href*')
+
+        $rawGenres = (((($WebRequest -split '<div class="row-right tags">')[1])`
+                                -split 'class="js-suggest-tag"')[0])
+
+        try {
+            $genres = ($rawGenres | Select-String -Pattern '(.*)<\/a>' -AllMatches).Matches | ForEach-Object { ($_.Groups[1].Value).Trim() }
+        } catch {
+            Write-Warning "Unable to parse genres: $PSItem"
+        }
+
         # Formats the genres as a comma-delimited string "Genre1, Genre2, etc." which is accepted by ComicInfo.xml format
-        $GenreString = $Genres[0..($Genres.Length - 2)] -join ", "
-        Write-Output $GenreString
+        $genreString = $genres[0..($Genres.Length - 2)] -join ", "
+        Write-Output $genreString
 }

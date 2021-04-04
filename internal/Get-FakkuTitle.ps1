@@ -5,9 +5,9 @@ function Get-FakkuTitle {
                 [String]$WebRequest
         )
 
-        $Title = ((((($WebRequest -split '<div class=\"content-name\">')[1])`
-                                        -split '<h1>')[1])`
-                        -split '<\/h1>')[0]
+        $title = (((((($WebRequest -split '<div class=\"content-name\">')[1])`
+                                                -split '<h1>')[1])`
+                                -split '<\/h1>')[0]).Trim()
 
-        Write-Output $Title
+        Write-Output $title
 }

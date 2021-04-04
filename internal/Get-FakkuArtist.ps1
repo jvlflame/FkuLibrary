@@ -5,8 +5,8 @@ function Get-FakkuArtist {
                 [String]$WebRequest
         )
 
-        $Artist = ((($WebRequest -split '<div class=\"row-right\"><a href=\"\/artists\/(.*?)\">')[2])`
-                        -split '<\/a><\/div>')[0]
-        
-        Write-Output $Artist
+        $artist = (((($WebRequest -split '<div class=\"row-right\"><a href=\"\/artists\/(.*?)\">')[2])`
+                                -split '<\/a><\/div>')[0]).Trim()
+
+        Write-Output $artist
 }
