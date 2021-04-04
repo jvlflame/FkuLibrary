@@ -37,8 +37,8 @@ function Get-PandaChaikaURL {
 
                 $SearchURL = "https://panda.chaika.moe/search/?title=$Title"
         }
-        
-        $SearchPage = Invoke-WebRequest -Uri $SearchURL -Method Get
+
+        $SearchPage = Invoke-WebRequest -Uri $SearchURL -Method Get -Verbose:$false
         $PageCheck = $SearchPage.Links.href | Where-Object { $_ -like '/archive/*' }
         if ($null -ne $PageCheck) {
                 if ($PageCheck.Count -ge 2) {
