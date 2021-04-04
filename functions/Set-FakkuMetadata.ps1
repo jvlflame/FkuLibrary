@@ -38,9 +38,10 @@ function Set-FakkuMetadata {
                         $PandaChaikaUrl = Get-PandaChaikaURL -DoujinName $DoujinName
 
                         try {
-                                $WebRequest = Invoke-WebRequest -Uri $PandaChaikaUrl -Method Get
-                                Get-MetadataXML -WebRequest $WebRequest.Content -XMLPath $XMLPath -Scraper PandaChaika
-                                Set-MetadataXML -FilePath $File.Name -XMLPath $XMLPath
+                                $WebRequest = Invoke-WebRequest -Uri $PandaChaikaUrl -Method Get -Verbose:$false
+                                $xml = $null
+                                $xml = Get-MetadataXML -WebRequest $WebRequest.Content -Scraper PandaChaika
+                                Set-MetadataXML -FilePath $File.Name -XMLPath $XMLPath -Content $xml
                         }
 
                         catch {
