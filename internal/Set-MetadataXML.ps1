@@ -4,10 +4,14 @@ function Set-MetadataXML {
                 [Parameter(Mandatory = $true)]
                 [String]$FilePath,
                 [Parameter(Mandatory = $true)]
-                [String]$XMLPath
+                [String]$XMLPath,
+                [Parameter(Mandatory = $true)]
+                [String]$Content
         )
 
-        # Temporarily rename files to bypass PowerShell path errors 
+        Set-Content -LiteralPath $XMLPath -Value $Content -Force
+
+        # Temporarily rename files to bypass PowerShell path errors
         # that occur when path contains square brackets "[]"
         if ($File.Name -match "\[" -or $File.Name -match "\]") {
                 $NewName = ($File.FullName -replace "\[", "_") -replace "\]", "_"

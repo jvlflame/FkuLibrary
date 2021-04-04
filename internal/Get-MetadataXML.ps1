@@ -30,19 +30,18 @@ function Get-MetadataXML {
         }
 
         $Content = @"
-        '<?xml version="1.0"?>'
-        '<ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
-        "  <Title>$Title</Title>"
-        "  <Series>$Series</Series>"
-        "  <Summary>$Summary</Summary>"
-        "  <Writer>$Artist</Writer>"
-        "  <Publisher>$Publisher</Publisher>"
-        "  <Genre>$Genres</Genre>"
-        # "  <Tags>$Parody</Tags>"
-        "  <LanguageISO>en</LanguageISO>"
-        "  <AgeRating>Adults Only 18+</AgeRating>"
-        "  <Manga>Yes</Manga>"
-        "</ComicInfo>"
+<?xml version="1.0"?>
+<ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Title>$Title</Title>
+  <Series>$Series</Series>
+  <Summary>$Summary</Summary>
+  <Writer>$Artist</Writer>
+  <Publisher>$Publisher</Publisher>
+  <Genre>$Genres</Genre>
+  <LanguageISO>en</LanguageISO>
+  <AgeRating>Adults Only 18+</AgeRating>
+  <Manga>Yes</Manga>
+</ComicInfo>
 "@
 
         Write-Output $Content

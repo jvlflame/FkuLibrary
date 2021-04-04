@@ -4,7 +4,6 @@ function Get-FakkuURL {
                 [Parameter(Mandatory = $true)]
                 [String]$DoujinName
         )
-        
         $DoujinName = $DoujinName -replace '★', 'bzb'
         # Gets the filename and converts it to a parseable Fakku web URL
         # The filename must match exactly what is presented by Fakku or scrape will fail
@@ -28,7 +27,6 @@ function Get-FakkuURL {
                 $CleanFileName = ($DoujinName -replace '[^-a-z0-9 ]+', '')`
                         -replace ' ', '-'
         }
-                
         $FakkuUrl = "https://www.fakku.net/hentai/$CleanFileName-english"
         Write-Output $FakkuUrl
 }

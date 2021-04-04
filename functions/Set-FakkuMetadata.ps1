@@ -9,45 +9,51 @@ function Set-FakkuMetadata {
 
         $ProgressPreference = 'SilentlyContinue'
         Write-Host "Starting Fakku metadata scraper on path: $FilePath"
-        
+
         # Check if FilePath is a directory or file to determine how to proceed
-        if ((Get-Item -Path $FilePath) -is [System.IO.DirectoryInfo]) { $Archive = Get-LocalArchives -FilePath $FilePath -Recurse:$Recurse }
-        else { $Archive = Get-Item $FilePath }
+        if ((Get-Item -Path $FilePath) -is [System.IO.DirectoryInfo]) {
+                $Archive = Get-LocalArchives -FilePath $FilePath -Recurse:$Recurse
+        } else {
+                $Archive = Get-Item $FilePath
+        }
 
         $Index = 1
         $TotalIndex = $Archive.Count
         foreach ($File in $Archive) {
                 $FakkuUrl = Get-FakkuURL -DoujinName $File.BaseName
-                $FileName = $File.FullName
                 $DoujinName = $File.BaseName
                 $XMLPath = Join-Path -Path $File.DirectoryName -ChildPath 'ComicInfo.xml'
                 Write-Host "($Index of $TotalIndex) Setting metadata for $DoujinName"
 
-                Try {
-                        $WebRequest = Invoke-WebRequest -Uri $FakkuUrl -Method Get
-                        Write-MetadataXML -WebRequest $WebRequest.Content -XMLPath $XMLPath -Fakku
-                        Set-MetadataXML -FilePath $File.Name -XMLPath $XMLPath
+                try {
+                        $WebRequest = Invoke-WebRequest -Uri $FakkuUrl -Method Get -Verbose:$false
+                        $xml = $null
+                        $xml = Get-MetadataXML -WebRequest $WebRequest.Content -Scraper Fakku
+                        Set-MetadataXML -FilePath $File.Name -XMLPath $XMLPath -Content $xml
                 }
 
-                Catch [Microsoft.PowerShell.Commands.HttpResponseException] {
-                        # Write-Warning "Could not find on Fakku. Attempting to search panda.chaika.moe..."
+                # If the Fakku URL returns an error, fallback to panda.chaika.moe
+                catch {
+                        Write-Warning "$DoujinName not found on Fakku..."
                         $PandaChaikaUrl = Get-PandaChaikaURL -DoujinName $DoujinName
 
-                        Try {
+                        try {
                                 $WebRequest = Invoke-WebRequest -Uri $PandaChaikaUrl -Method Get
-                                Write-MetadataXML -WebRequest $WebRequest.Content -XMLPath $XMLPath -PandaChaika
+                                Get-MetadataXML -WebRequest $WebRequest.Content -XMLPath $XMLPath -Scraper PandaChaika
                                 Set-MetadataXML -FilePath $File.Name -XMLPath $XMLPath
                         }
 
-                        Catch {
-                                Write-Warning "Could not find metadata for $FileName. Skipping..."
+                        catch {
+                                Write-Warning "$DoujinName not found on panda.chaika..."
                                 #Write-Error | Out-File -FilePath (Join-Path -Path ../$PSScriptRoot -ChildPath 'log.txt') -NoClobber -Append
                         }
                 }
 
-                Catch [System.Net.WebException] {
+                <#
+                [Microsoft.PowerShell.Commands.HttpResponseException]
+                catch [System.Net.WebException] {
                         Write-Host "Could not find '$DoujinName' on Fakku. Manga is inaccessible without authentication."
-                }
+                } #>
 
                 $Index++
                 # Start-Sleep -Seconds 1
