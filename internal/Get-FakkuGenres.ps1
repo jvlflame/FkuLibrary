@@ -9,9 +9,9 @@ function Get-FakkuGenres {
                                 -split 'class="js-suggest-tag"')[0])
 
         try {
-            $genres = ($rawGenres | Select-String -Pattern '(.*)<\/a>' -AllMatches).Matches | ForEach-Object { ($_.Groups[1].Value).Trim() }
+                $genres = ($rawGenres | Select-String -Pattern '(.*)<\/a>' -AllMatches).Matches | ForEach-Object { ($_.Groups[1].Value).Trim() }
         } catch {
-            Write-Warning "Unable to parse genres: $PSItem"
+                # Do nothing
         }
 
         # Formats the genres as a comma-delimited string "Genre1, Genre2, etc." which is accepted by ComicInfo.xml format
