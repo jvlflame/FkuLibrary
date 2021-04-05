@@ -5,10 +5,7 @@ function Set-FakkuMetadata {
                 [System.IO.FileInfo]$FilePath,
 
                 [Parameter(Mandatory = $false)]
-                [String]$FakkuUrl,
-
-                [Parameter(Mandatory = $false)]
-                [String]$PandaChaikaUrl,
+                [String]$Url,
 
                 [Parameter(Mandatory = $false)]
                 [Switch]$Recurse
@@ -25,16 +22,28 @@ function Set-FakkuMetadata {
         }
 
         if (Test-Path -Path $FilePath -PathType Container) {
-                if ($FakkuUrl -or $PandaChaikaUrl) {
+                if ($Url) {
                         Write-Warning "Parameters -FakkuUrl and -PandaChaikaUrl can only be used with a direct file path, not a directory..."
                         return
+                }
+        }
+
+        if ($PSBoundParameters.ContainsKey('Url')) {
+                if ($Url -match 'fakku') {
+                        $UriLocation = 'fakku'
+                } elseif ($Url -match 'panda.chaika') {
+                        $UriLocation = 'panda.chaika'
+                } else {
+                        Write-Warning "Url $Url is not a valid fakku or panda.chaika url"
                 }
         }
 
         $Index = 1
         $TotalIndex = $Archive.Count
         foreach ($File in $Archive) {
-                if (!$FakkuUrl) {
+                if ($UriLocation -eq 'fakku') {
+                        $FakkuUrl = $Url
+                } else {
                         $FakkuUrl = Get-FakkuURL -DoujinName $File.BaseName
                 }
                 $DoujinName = $File.BaseName
@@ -51,7 +60,9 @@ function Set-FakkuMetadata {
                 # If the Fakku URL returns an error, fallback to panda.chaika.moe
                 catch {
                         Write-Warning "$DoujinName not found on Fakku..."
-                        if (!$PandaChaikaUrl) {
+                        if ($UriLocation -eq 'panda.chaika') {
+                                $PandaChaikaUrl = $Url
+                        } else {
                                 $PandaChaikaUrl = Get-PandaChaikaURL -DoujinName $DoujinName
                         }
 
