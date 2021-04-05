@@ -3,6 +3,13 @@ function Set-FakkuMetadata {
         param(
                 [Parameter(Mandatory = $true, Position = 1)]
                 [System.IO.FileInfo]$FilePath,
+
+                [Parameter(Mandatory = $false)]
+                [String]$FakkuUrl,
+
+                [Parameter(Mandatory = $false)]
+                [String]$PandaChaikaUrl,
+
                 [Parameter(Mandatory = $false)]
                 [Switch]$Recurse
         )
@@ -17,10 +24,19 @@ function Set-FakkuMetadata {
                 $Archive = Get-Item $FilePath
         }
 
+        if (Test-Path -Path $FilePath -PathType Container) {
+                if ($FakkuUrl -or $PandaChaikaUrl) {
+                        Write-Warning "Parameters -FakkuUrl and -PandaChaikaUrl can only be used with a direct file path, not a directory..."
+                        return
+                }
+        }
+
         $Index = 1
         $TotalIndex = $Archive.Count
         foreach ($File in $Archive) {
-                $FakkuUrl = Get-FakkuURL -DoujinName $File.BaseName
+                if (!$FakkuUrl) {
+                        $FakkuUrl = Get-FakkuURL -DoujinName $File.BaseName
+                }
                 $DoujinName = $File.BaseName
                 $XMLPath = Join-Path -Path $File.DirectoryName -ChildPath 'ComicInfo.xml'
                 Write-Host "($Index of $TotalIndex) Setting metadata for $DoujinName"
@@ -35,7 +51,9 @@ function Set-FakkuMetadata {
                 # If the Fakku URL returns an error, fallback to panda.chaika.moe
                 catch {
                         Write-Warning "$DoujinName not found on Fakku..."
-                        $PandaChaikaUrl = Get-PandaChaikaURL -DoujinName $DoujinName
+                        if (!$PandaChaikaUrl) {
+                                $PandaChaikaUrl = Get-PandaChaikaURL -DoujinName $DoujinName
+                        }
 
                         try {
                                 $WebRequest = Invoke-WebRequest -Uri $PandaChaikaUrl -Method Get -Verbose:$false
