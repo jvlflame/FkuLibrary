@@ -41,8 +41,26 @@ function Get-PandaChaikaURL {
         $SearchPage = Invoke-WebRequest -Uri $SearchURL -Method Get -Verbose:$false
         $PageCheck = $SearchPage.Links.href | Where-Object { $_ -like '/archive/*' }
         if ($null -ne $PageCheck) {
-                if ($PageCheck.Count -ge 2) {
-                        $PandaChaikaID = $PageCheck[0]
+                if ($PageCheck.Count -gt 1) {
+                        $Results = @()
+                        $PageCheck | Select-Object -First 3 | ForEach-Object {
+                                $WebRequest = Invoke-WebRequest -Uri "https://panda.chaika.moe$_" -Verbose:$false
+                                $Results += [PSCustomObject]@{
+                                        PandaChaikaID = $_
+                                        Publisher     = Get-PandaChaikaPublisher -Webrequest $WebRequest
+                                }
+                        }
+
+                        $MatchedFakku = $Results | Where-Object { $_.Publisher -eq 'fakku' }
+                        if ($MatchedFakku) {
+                                if ($MatchedFakku.Count -gt 1) {
+                                        $PandaChaikaID = $MatchedFakku[0].PandaChaikaID
+                                } else {
+                                        $PandaChaikaID = $MatchedFakku.PandaChaikaID
+                                }
+                        } else {
+                                $PandaChaikaID = $Results[0].PandaChaikaID
+                        }
                 }
 
                 else {
