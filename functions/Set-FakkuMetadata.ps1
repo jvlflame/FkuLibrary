@@ -8,8 +8,30 @@ function Set-FakkuMetadata {
                 [String]$Url,
 
                 [Parameter(Mandatory = $false)]
-                [Switch]$Recurse
+                [Switch]$Recurse,
+
+                [Parameter(Mandatory = $false)]
+                [Switch]$Log,
+
+                [Parameter(Mandatory = $false)]
+                [System.IO.FileInfo]$LogPath = ".\fkulibrary.log"
         )
+
+        function Write-FakkuLog {
+                param(
+                        [Switch]$Log,
+                        [System.IO.FileInfo]$LogPath,
+                        [String]$Source
+                )
+
+                if ($Log) {
+                        [PSCustomObject]@{
+                                FilePath = $FilePath
+                                Url      = $FakkuUrl
+                                Source   = $Source
+                        } | Export-Csv -Path $LogPath -Append
+                }
+        }
 
         $ProgressPreference = 'SilentlyContinue'
         Write-Host "Starting Fakku metadata scraper on path: $FilePath"
@@ -35,42 +57,57 @@ function Set-FakkuMetadata {
                         $UriLocation = 'panda.chaika'
                 } else {
                         Write-Warning "Url $Url is not a valid fakku or panda.chaika url"
+                        return
                 }
+                Write-Debug "UriLocation: $UriLocation"
         }
 
         $Index = 1
         $TotalIndex = $Archive.Count
         foreach ($File in $Archive) {
-                if ($UriLocation -eq 'fakku') {
-                        $FakkuUrl = $Url
-                } else {
-                        $FakkuUrl = Get-FakkuURL -DoujinName $File.BaseName
+                if ($UriLocation) {
+                        if ($UriLocation -eq 'fakku') {
+                                $FakkuUrl = $Url
+                        }
+                        if ($UriLocation -eq 'panda.chaika') {
+                                $PandaChaikaUrl = $Url
+                        }
                 }
+
+                Write-Debug "FakkuUrl: $FakkuUrl"
+                Write-Debug "PandaChaikaUrl: $PandaChaikaUrl"
+
                 $DoujinName = $File.BaseName
                 $XMLPath = Join-Path -Path $File.DirectoryName -ChildPath 'ComicInfo.xml'
                 Write-Host "($Index of $TotalIndex) Setting metadata for $DoujinName"
 
                 try {
+                        if (!$UriLocation) {
+                                $FakkuUrl = Get-FakkuURL -DoujinName $File.BaseName
+                        }
                         $WebRequest = Invoke-WebRequest -Uri $FakkuUrl -Method Get -Verbose:$false
                         $xml = $null
                         $xml = Get-MetadataXML -WebRequest $WebRequest.Content -Scraper Fakku
                         Set-MetadataXML -FilePath $File.Name -XMLPath $XMLPath -Content $xml
+                        Write-FakkuLog -Log:$Log -LogPath $LogPath -Source "Fakku"
+                        Write-Verbose "Set $FilePath with $FakkuUrl"
+                        Write-Debug "Set $FilePath using Fakku"
                 }
 
                 # If the Fakku URL returns an error, fallback to panda.chaika.moe
                 catch {
-                        Write-Warning "$DoujinName not found on Fakku..."
-                        if ($UriLocation -eq 'panda.chaika') {
-                                $PandaChaikaUrl = $Url
-                        } else {
-                                $PandaChaikaUrl = Get-PandaChaikaURL -DoujinName $DoujinName
-                        }
-
                         try {
+                                if (!$UriLocation) {
+                                        Write-Warning "$DoujinName not found on Fakku..."
+                                        $PandaChaikaUrl = Get-PandaChaikaURL -DoujinName $File.BaseName
+                                }
                                 $WebRequest = Invoke-WebRequest -Uri $PandaChaikaUrl -Method Get -Verbose:$false
                                 $xml = $null
                                 $xml = Get-MetadataXML -WebRequest $WebRequest.Content -Scraper PandaChaika
                                 Set-MetadataXML -FilePath $File.Name -XMLPath $XMLPath -Content $xml
+                                Write-FakkuLog -Log:$Log -LogPath $LogPath -Source "PandaChaikaMoe"
+                                Write-Verbose "Set $FilePath with $PandaChaikaUrl"
+                                Write-Debug "Set $FilePath using Panda.Chaika.Moe"
                         }
 
                         catch {
