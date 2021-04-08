@@ -28,6 +28,18 @@ function Get-PandaChaikaGenres {
                                 -replace '_', ' ') | Select-Object -Unique | Where-Object { $_ -notlike '' }
         }
 
+        elseif ($WebRequest -match '<label class="label-extended">(fe)?male:<\/label>') {
+                $RawGenres = ((($WebRequest -split '<ul class="tags">')[1] -split '<\/ul>')[0] `
+                        | Select-String -Pattern '<a href="\/tag\/(fe)?male:(.*)\/">' -AllMatches).Matches `
+                | ForEach-Object { $_.Groups[2].Value }
+
+                $RawGenres += (((($WebRequest -split '<ul class="tags">')[1] -split '<\/ul>')[0] -split '<li>')[-1] `
+                        | Select-String -Pattern '<a href="\/tag\/(?:fe)?(?:male:)?(.*)\/' -AllMatches).Matches `
+                | ForEach-Object { $_.Groups[1].Value }
+
+                $RawGenres = $RawGenres | Where-Object { $_ -ne '' } | Select-Object -Unique
+        }
+
         else {
                 $RawGenres = (((((((((($WebRequest -split '<a href=\"\/tag\/artist:(.*?)\/">')[2])`
                                                                                         -split '<li>')[1])`
@@ -35,7 +47,6 @@ function Get-PandaChaikaGenres {
                                                         -split '<a href=\"\/tag\/(.*?)\/">')`
                                                 -split '<\/a>').Trim())`
                                 -replace '_', ' ') | Select-Object -Unique | Where-Object { $_ -notlike '' }
-
         }
 
         <# $RawGenres = $WebRequest | Where-Object { $_ -like '/tag/*' -and `
@@ -78,7 +89,7 @@ function Get-PandaChaikaSeries {
                                         -split '<\/a><\/div>')[0])`
                         -replace '%23', '#')`
                 -replace '_', ' '
-        
+
         $Series = $TextInfo.ToTitleCase($RawSeries)
         if ($null -eq $Series -or $Series -eq '') {
                 $Series = "Unknown"
@@ -96,7 +107,7 @@ function Get-PandaChaikaSummary {
         $Summary = ((((($WebRequest -split '<th>Description</th>')[1])`
                                         -split '<td>')[1])`
                         -split '<\/td>')[0]
-        
+
         Write-Output $Summary
 }
 
@@ -109,6 +120,6 @@ function Get-PandaChaikaTitle {
 
         $Title = (((($WebRequest -split '<title>')[1])`
                                 -split '\|')[0]).Trim()
-        
+
         Write-Output $Title
 }
