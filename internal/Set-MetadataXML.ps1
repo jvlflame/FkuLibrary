@@ -16,8 +16,10 @@ function Set-MetadataXML {
         if ($File.Name -match "\[" -or $File.Name -match "\]") {
                 $NewName = ($File.FullName -replace "\[", "_") -replace "\]", "_"
                 Rename-Item -LiteralPath $File -NewName $NewName
+        } else {
+                $NewName = $FilePath
         }
-
+	
         Compress-Archive -Path $XMLPath -Update -DestinationPath $NewName
         Remove-Item -Path $XMLPath -Force
         Rename-Item -LiteralPath $NewName -NewName $FilePath
