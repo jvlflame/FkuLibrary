@@ -21,7 +21,6 @@ supporting filetypes: .zip, .cbz, .rar, .cbr, .7z, and .cb7.
 
 ```
 <?xml version="1.0"?>
-<?xml version="1.0"?>
 <ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Title>Bare Girl</Title>
   <AlternateSeries>Original Work</AlternateSeries>
