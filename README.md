@@ -104,7 +104,7 @@ Set-FakkuMetadata -FilePath "C:\path\to\file\file.cbz"
 #### Set metadata for archives in specified filepath using an open instance of Chrome
 
 ```
-Set-FakkuMetadata -FilePath -Remote "C:\path\to\file\file.cbz"
+Set-FakkuMetadata -Remote -FilePath "C:\path\to\file\file.cbz"
 ```
 
 (Note: Use this to circumvent chromedriver opening a new window everytime when individually setting metadata. Make sure to open Chrome and login to FAKKU beforehand with the --remote-debugging-port argument (tries --remote-debugging-port=5656 by default)
