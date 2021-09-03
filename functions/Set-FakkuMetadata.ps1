@@ -169,7 +169,7 @@ function Set-FakkuMetadata {
                                                 Write-Warning "$DoujinName not found on Fakku..."
                                                 $PandaChaikaUrl = Get-PandaChaikaURL -DoujinName $File.BaseName
                                         }
-                                        $PandaList += $File.FullName
+					
                                         $WebRequest = Invoke-WebRequest -Uri $PandaChaikaUrl -Method Get -Verbose:$false
                                         $xml = $null
                                         $xml = Get-MetadataXML -WebRequest $WebRequest.Content -Scraper PandaChaika -URL $PandaChaikaUrl
