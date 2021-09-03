@@ -12,6 +12,9 @@ function Get-FakkuSeries {
 		$Series = (((($WebRequest -split '<div class=\"row-right\"><a href=\"\/events\/(.*?)\">')[2])`
                                 	-split '<\/a><\/div>')[0]).Trim()
 	}
+        
+        $Series = $Series -replace '<[^>]*>', ''`
+                -replace '[\r\n\t\f\v]', ''
 
         #$Series = $TextInfo.ToTitleCase($rawSeries)
         Write-Output $Series
