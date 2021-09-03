@@ -16,6 +16,7 @@ function Get-FakkuSummary {
                 -replace '<br/>', "`n"`
                 -replace '</p>', "`n"`
                 -replace'<a[^>]*>(.*?)<\/a>', '$1'`
-                -replace '<[^>]*>', ''
+                -replace '<[^>]*>', ''`
+                -replace '&', '&amp;'
         Write-Output $summary
 }
