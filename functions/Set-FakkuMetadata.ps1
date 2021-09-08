@@ -117,11 +117,11 @@ function Set-FakkuMetadata {
                                                 $env:Path += ";$WebDriverPath"
                                         }
                                     
-                                        if (-Not (Test-Path -Path "$WebDriverPath\chromedriver.exe")) {
+                                        if (-Not (Test-Path -Path (Join-Path -Path $WebDriverPath -ChildPath "chromedriver.exe"))) {
                                                 Write-Warning "chromedriver.exe does not exist. Download the version matching your browser version and extract to your web driver path - https://chromedriver.chromium.org/downloads"
                                         }
                                     
-                                        if (-Not (Test-Path -Path "$WebDriverPath\WebDriver.dll")) {
+                                        if (-Not (Test-Path -Path (Join-Path -Path $WebDriverPath -ChildPath "WebDriver.dll"))) {
                                                 Write-Warning "WebDriver.dll does not exist. Download and extract WebDriver.dll from inside \selenium-dotnet-3.14.0.zip\dist\Selenium.WebDriver.3.14.0.nupkg\lib\net45\ to your web driver path - https://goo.gl/uJJ5Sc"
                                         }
                                 
@@ -133,8 +133,9 @@ function Set-FakkuMetadata {
 
                                 # Opens a new window if it doesn't detect one open.
                                 if ([string]::IsNullOrEmpty($ChromeDriver.WindowHandles)) {
+					$DllPath = Join-Path -Path $WebDriverPath -ChildPath "WebDriver.dll"
                                         Write-Host "Starting browser..."
-                                        Import-Module "$($WebDriverPath)\WebDriver.dll"
+                                        Import-Module $DllPath
                                         $Service = [OpenQA.Selenium.Chrome.ChromeDriverService]::CreateDefaultService($WebDriverPath)
                                         $Service.SuppressInitialDiagnosticInformation = $true
                                         $Service.HideCommandPromptWindow = $true
