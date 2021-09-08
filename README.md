@@ -66,7 +66,7 @@ Manga Title.ext
 files to a directory of your choice.
 
 [Download the chromedriver](https://chromedriver.chromium.org/downloads) version that matches your version of chrome as well as the [Selenium WebDriver for C#](https://goo.gl/uJJ5Sc). Extract `chromedriver.exe` and `WebDriver.dll` to a writable path (by default, it tries `C:\Selenium`).
-> Note: `The WebDriver.dll` file is found inside `\selenium-dotnet-3.14.0.zip\dist\Selenium.WebDriver.3.14.0.nupkg\lib\net45\`. The .nupkg file can be renamed to .zip for easier access. If the chromedriver.exe isn't working as expected, ensure the version matches with your Chrome browser. If they're matching and it still doesn't work, try downgrading your chromedriver.exe version or updating your Chrome.
+> Note: The `WebDriver.dll` file is found inside `\selenium-dotnet-3.14.0.zip\dist\Selenium.WebDriver.3.14.0.nupkg\lib\net45\`. The .nupkg file can be renamed to .zip for easier access. If the chromedriver.exe isn't working as expected, ensure the version matches with your Chrome browser. If they're matching and it still doesn't work, try downgrading your chromedriver.exe version or updating your Chrome.
 
 #### Import the module
 
