@@ -14,7 +14,15 @@ function Set-FakkuMetadata {
                 [Switch]$Log,
 
                 [Parameter(Mandatory = $false)]
-                [System.IO.FileInfo]$LogPath = ".\fkulibrary.log"
+                [System.IO.FileInfo]$LogPath = ".\fkulibrary.log",
+
+                # Sets path to chromedriver.exe and WebDriver.dll
+                [Parameter(Mandatory = $false)]
+                [System.IO.FileInfo]$WebDriverPath = "C:\Selenium",
+
+                # Use this to circumvent chromedriver opening a new window everytime when individually setting metadata. Make sure to open Chrome and login to FAKKU beforehand with the --remote-debugging-port argument (--remote-debugging-port=5656 by default)
+                [Parameter(Mandatory = $false)]
+                [Switch]$Remote
         )
 
         function Write-FakkuLog {
@@ -45,7 +53,7 @@ function Set-FakkuMetadata {
 
         if (Test-Path -Path $FilePath -PathType Container) {
                 if ($Url) {
-                        Write-Warning "Parameters -FakkuUrl and -PandaChaikaUrl can only be used with a direct file path, not a directory..."
+                        Write-Warning "Url parameter can only be used with a direct file path, not a directory..."
                         return
                 }
         }
@@ -79,6 +87,7 @@ function Set-FakkuMetadata {
 
                 $DoujinName = $File.BaseName
                 $XMLPath = Join-Path -Path $File.DirectoryName -ChildPath 'ComicInfo.xml'
+		Write-Debug "$XMLPath"
                 Write-Host "($Index of $TotalIndex) Setting metadata for $DoujinName"
 
                 try {
@@ -87,43 +96,103 @@ function Set-FakkuMetadata {
                         }
                         $WebRequest = Invoke-WebRequest -Uri $FakkuUrl -Method Get -Verbose:$false
                         $xml = $null
-                        $xml = Get-MetadataXML -WebRequest $WebRequest.Content -Scraper Fakku
-                        Set-MetadataXML -FilePath $File.Name -XMLPath $XMLPath -Content $xml
+                        $xml = Get-MetadataXML -WebRequest $WebRequest.Content -Scraper Fakku -URL $FakkuUrl
+                        Set-MetadataXML -FilePath $File.FullName -XMLPath $XMLPath -Content $xml
                         Write-FakkuLog -Log:$Log -LogPath $LogPath -Source "Fakku"
                         Write-Verbose "Set $FilePath with $FakkuUrl"
-                        Write-Debug "Set $FilePath using Fakku"
+                        Write-Debug "Set $File using Fakku"
                 }
 
-                # If the Fakku URL returns an error, fallback to panda.chaika.moe
+                # Try to get credentials before falling back on panda.chaika.moe
                 catch {
-                        try {
+                        try{
                                 if (!$UriLocation) {
-                                        Write-Warning "$DoujinName not found on Fakku..."
-                                        $PandaChaikaUrl = Get-PandaChaikaURL -DoujinName $File.BaseName
+                                        Write-Warning "Attempting to use browser..."
+                                        $FakkuUrl = Get-FakkuURL -DoujinName $File.BaseName
                                 }
-                                $WebRequest = Invoke-WebRequest -Uri $PandaChaikaUrl -Method Get -Verbose:$false
+                                
+                                # Test for and adds web driver directory to PATH
+                                if (Test-Path -Path $WebDriverPath) {
+                                        if (($env:Path -split ';') -notcontains $WebDriverPath) {
+                                                $env:Path += ";$WebDriverPath"
+                                        }
+                                    
+                                        if (-Not (Test-Path -Path (Join-Path -Path $WebDriverPath -ChildPath "chromedriver.exe"))) {
+                                                Write-Warning "chromedriver.exe does not exist. Download the version matching your browser version and extract to your web driver path - https://chromedriver.chromium.org/downloads"
+                                        }
+                                    
+                                        if (-Not (Test-Path -Path (Join-Path -Path $WebDriverPath -ChildPath "WebDriver.dll"))) {
+                                                Write-Warning "WebDriver.dll does not exist. Download and extract WebDriver.dll from inside \selenium-dotnet-3.14.0.zip\dist\Selenium.WebDriver.3.14.0.nupkg\lib\net45\ to your web driver path - https://goo.gl/uJJ5Sc"
+                                        }
+                                
+                                } 
+                                
+                                else {
+                                        Write-Warning "Web driver directory does not exist. Please set it using -WebDriverPath (C:\Selenium by default)"
+                                }
+
+                                # Opens a new window if it doesn't detect one open.
+                                if ([string]::IsNullOrEmpty($ChromeDriver.WindowHandles)) {
+					$DllPath = Join-Path -Path $WebDriverPath -ChildPath "WebDriver.dll"
+                                        Write-Host "Starting browser..."
+                                        Import-Module $DllPath
+                                        $Service = [OpenQA.Selenium.Chrome.ChromeDriverService]::CreateDefaultService($WebDriverPath)
+                                        $Service.SuppressInitialDiagnosticInformation = $true
+                                        $Service.HideCommandPromptWindow = $true
+                                        if ($Remote) {
+                                                $ChromeOptions = New-Object OpenQA.Selenium.Chrome.ChromeOptions
+                                                $ChromeOptions.debuggerAddress = "127.0.0.1:5656"
+                                                $ChromeDriver = [OpenQA.Selenium.Chrome.ChromeDriver]::new($Service, $ChromeOptions)
+                                        } 
+                                        
+                                        else {
+                                                $ChromeDriver = [OpenQA.Selenium.Chrome.ChromeDriver]::new($Service)
+                                                $ChromeDriver.Navigate().GoToURL("https://fakku.net/login")
+                                                Write-Host -NoNewLine 'Please log into FAKKU then press any key to continue...'
+                                                $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+                                        }  
+                                }
+                                
+                                $ChromeDriver.Navigate().GoToURL($FakkuUrl)
                                 $xml = $null
-                                $xml = Get-MetadataXML -WebRequest $WebRequest.Content -Scraper PandaChaika
-                                Set-MetadataXML -FilePath $File.Name -XMLPath $XMLPath -Content $xml
-                                Write-FakkuLog -Log:$Log -LogPath $LogPath -Source "PandaChaikaMoe"
-                                Write-Verbose "Set $FilePath with $PandaChaikaUrl"
-                                Write-Debug "Set $FilePath using Panda.Chaika.Moe"
+                                $xml = Get-MetadataXML -WebRequest $ChromeDriver.PageSource -Scraper Fakku -URL $FakkuUrl
+                                Set-MetadataXML -FilePath $File.FullName -XMLPath $XMLPath -Content $xml
+                                Write-FakkuLog -Log:$Log -LogPath $LogPath -Source "Fakku"
+                                Write-Verbose "Set $FilePath with $FakkuUrl"
+                                Write-Debug "Set $File using Fakku"
+
                         }
 
-                        catch {
-                                Write-Warning "$DoujinName not found on panda.chaika..."
-                                #Write-Error | Out-File -FilePath (Join-Path -Path ../$PSScriptRoot -ChildPath 'log.txt') -NoClobber -Append
+                        # If the Fakku URL returns an error, fallback to panda.chaika.moe
+                        catch{
+                                try {
+                                        if (!$UriLocation) {
+                                                Write-Warning "$DoujinName not found on Fakku..."
+                                                $PandaChaikaUrl = Get-PandaChaikaURL -DoujinName $File.BaseName
+                                        }
+					
+                                        $WebRequest = Invoke-WebRequest -Uri $PandaChaikaUrl -Method Get -Verbose:$false
+                                        $xml = $null
+                                        $xml = Get-MetadataXML -WebRequest $WebRequest.Content -Scraper PandaChaika -URL $PandaChaikaUrl
+                                        Set-MetadataXML -FilePath $File.FullName -XMLPath $XMLPath -Content $xml
+                                        Write-FakkuLog -Log:$Log -LogPath $LogPath -Source "PandaChaikaMoe"
+                                        Write-Verbose "Set $FilePath with $PandaChaikaUrl"
+                                        Write-Debug "Set $FilePath using Panda.Chaika.Moe"
+                                }
+        
+                                catch {
+                                        Write-Warning "$DoujinName not found on panda.chaika..."
+                                        #Write-Error | Out-File -FilePath (Join-Path -Path ../$PSScriptRoot -ChildPath 'log.txt') -NoClobber -Append
+                                }
+                                
                         }
                 }
-
-                <#
-                [Microsoft.PowerShell.Commands.HttpResponseException]
-                catch [System.Net.WebException] {
-                        Write-Host "Could not find '$DoujinName' on Fakku. Manga is inaccessible without authentication."
-                } #>
 
                 $Index++
                 # Start-Sleep -Seconds 1
+        } 
+        if ($ChromeDriver) {
+                $ChromeDriver.Quit()
         }
         Write-Host "Complete!"
 }

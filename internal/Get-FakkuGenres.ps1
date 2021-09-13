@@ -15,6 +15,6 @@ function Get-FakkuGenres {
         }
 
         # Formats the genres as a comma-delimited string "Genre1, Genre2, etc." which is accepted by ComicInfo.xml format
-        $genreString = $genres[0..($Genres.Length - 2)] -join ", "
+        $genreString = $genres[0..($Genres.Length - 1)] -join ", "
         Write-Output $genreString
 }

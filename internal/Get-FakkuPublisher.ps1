@@ -5,10 +5,10 @@ function Get-FakkuPublisher {
                 [String]$WebRequest
         )
 
-        $TextInfo = (Get-Culture).TextInfo
-        $rawPublisher = (((($WebRequest -split '<div class=\"row-right\"><a href=\"\/publishers\/(.*?)\">')[2])`
-                                -split '<\/a><\/div>')[0]).ToLower().Trim()
+        #$TextInfo = (Get-Culture).TextInfo
+        $Publisher = (((($WebRequest -split '<div class=\"row-right\"><a href=\"\/publishers\/(.*?)\">')[2])`
+                                -split '<\/a><\/div>')[0]).Trim()
 
-        $publisher = $TextInfo.ToTitleCase($rawPublisher)
-        Write-Output $publisher
+        #$publisher = $TextInfo.ToTitleCase($rawPublisher)
+        Write-Output $Publisher
 }

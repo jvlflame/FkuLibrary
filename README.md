@@ -23,14 +23,18 @@ supporting filetypes: .zip, .cbz, .rar, .cbr, .7z, and .cb7.
 <?xml version="1.0"?>
 <ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Title>Bare Girl</Title>
-  <Series>Comic Kairakuten BEAST 2017-03</Series>
+  <AlternateSeries>Original Work</AlternateSeries>
   <Summary>Don't stare at me… you make me wanna strip…</Summary>
+  <Year>2017</Year>
+  <Month>03</Month>
   <Writer>Tsukako</Writer>
-  <Publisher>Fakku</Publisher>
-  <Genre>vanilla, blowjob, oppai, stockings, slice of life, hentai, booty, creampie, uncensored, lingerie, cosplay, subscription</Genre>
+  <Publisher>FAKKU</Publisher>
+  <Genre>vanilla, booty, busty, stockings, creampie, uncensored, unlimited, blowjob, hentai, lingerie, cosplay</Genre>
+  <Web>https://www.fakku.net/hentai/Bare-Girl-english</Web>
   <LanguageISO>en</LanguageISO>
-  <AgeRating>Adults Only 18+</AgeRating>
   <Manga>Yes</Manga>
+  <SeriesGroup>Comic Kairakuten BEAST 2017-03</SeriesGroup>
+  <AgeRating>Adults Only 18+</AgeRating>
 </ComicInfo>
 ```
 
@@ -60,6 +64,9 @@ Manga Title.ext
 
 [Clone the repository](https://github.com/jvlflame/Fakku-Library/archive/master.zip) and extract the
 files to a directory of your choice.
+
+[Download the chromedriver](https://chromedriver.chromium.org/downloads) version that matches your version of chrome as well as the [Selenium WebDriver for C#](https://goo.gl/uJJ5Sc). Extract `chromedriver.exe` and `WebDriver.dll` to a writable path (by default, it tries `C:\Selenium`).
+> Note: The `WebDriver.dll` file is found inside `\selenium-dotnet-3.14.0.zip\dist\Selenium.WebDriver.3.14.0.nupkg\lib\net45\`. The .nupkg file can be renamed to .zip for easier access. If the chromedriver.exe isn't working as expected, ensure the version matches with your Chrome browser. If they're matching and it still doesn't work, try downgrading your chromedriver.exe version or updating your Chrome.
 
 #### Import the module
 
@@ -93,3 +100,10 @@ Set-FakkuMetadata -FilePath "C:\path\to\files\" -Recurse
 ```
 Set-FakkuMetadata -FilePath "C:\path\to\file\file.cbz"
 ```
+
+#### Set metadata for archives in specified filepath using an open instance of Chrome
+
+```
+Set-FakkuMetadata -Remote -FilePath "C:\path\to\file\file.cbz"
+```
+> Note: Use this to circumvent chromedriver opening a new window everytime when setting metadata to individual archives. Make sure to open Chrome with the --remote-debugging-port argument (tries --remote-debugging-port=5656 by default) and login to FAKKU beforehand.
