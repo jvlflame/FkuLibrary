@@ -5,12 +5,15 @@ function Get-FakkuSeries {
                 [String]$WebRequest
         )
 
-        #$TextInfo = (Get-Culture).TextInfo
-        $Series = (((($WebRequest -split '<div class=\"row-right\"><a href=\"\/magazines\/(.*?)\">')[2])`
-                                -split '<\/a><\/div>')[0]).Trim()
+        # (Removed title case in favor of official stylization)
+        #$TextInfo = (Get-Culture).TextInfo 
+        $Series = (((($WebRequest -split '<a href=\"\/magazines\/(.*?)\">')[2])`
+                -split '<\/a><\/div>')[0]).Trim()
+
+        # Will use event instead if there is no magazine
 	if ([string]::IsNullOrEmpty($Series)) {
-		$Series = (((($WebRequest -split '<div class=\"row-right\"><a href=\"\/events\/(.*?)\">')[2])`
-                                	-split '<\/a><\/div>')[0]).Trim()
+		$Series = (((($WebRequest -split '<a href=\"\/events\/(.*?)\">')[2])`
+                        -split '<\/a><\/div>')[0]).Trim()
 	}
         
         $Series = $Series -replace '<[^>]*>', ''`

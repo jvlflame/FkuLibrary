@@ -5,18 +5,19 @@ function Get-FakkuSummary {
                 [String]$WebRequest
         )
 
-        $rawSummary = ((((($WebRequest -split '<div class="row-left">Description<\/div>')[1])`
-                                        -split '<div class="row-right">')[1]`
-                                -split '<\/div>')[0]).Trim()
+        # Will try to detect where line breaks should be present and insert them (letter/number directly following punctuation)
+        $Summary = (((($WebRequest -split '<meta name="description" content=" ')[1])`
+                -split '">')[0]).Trim()`
+                -replace '(\.|\?|\!)([a-zA-Z0-9])', '$1`n`n$2'`
+                -replace '&', '&amp;'
 
-        # Removes the <br><br> string which appears in the raw HTML when the description on Fakku has line breaks
-        # Added filtering for other tags and changed line break to insert new lines
-        $summary = $rawSummary -replace '<br>', "`n"`
+        # Removing as new site layout requires getting description from the header
+        <#$Summary = $rawSummary -replace '<br>', "`n"`
                 -replace '<br />', "`n"`
                 -replace '<br/>', "`n"`
                 -replace '</p>', "`n"`
                 -replace'<a[^>]*>(.*?)<\/a>', '$1'`
                 -replace '<[^>]*>', ''`
-                -replace '&', '&amp;'
-        Write-Output $summary
+                -replace '&', '&amp;'#>
+        Write-Output $Summary
 }

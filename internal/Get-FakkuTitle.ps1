@@ -5,10 +5,9 @@ function Get-FakkuTitle {
                 [String]$WebRequest
         )
 
-        $title = (((((($WebRequest -split '<div class=\"content-name\">')[1])`
-                                                -split '<h1>')[1])`
-                                -split '<\/h1>')[0]).Trim()
-        $title = $title -replace '&', '&amp;'
+        # Site layout change makes it easier to grab title from <title> tag
+        $Title = (($WebRequest -split '<title>(.*?) Hentai by .*? - FAKKU<\/title>')[1]).Trim()`
+                -replace '&', '&amp;'
 
-        Write-Output $title
+        Write-Output $Title
 }

@@ -5,7 +5,7 @@ function Get-FakkuURL {
                 [String]$DoujinName
         )
         # Added other special character exceptions
-        #It looks like some links convert apostrophes (') to 'bgb' while some don't. Can't really be bothered to write an elegant solution that checks both link possibilites
+        # It looks like some links convert apostrophes (') to 'bgb' while some don't. Can't really be bothered to write an elegant solution that checks both link possibilites
         $DoujinName = $DoujinName -replace '★', 'bzb' `
                 -replace '☆', 'byb' `
                 -replace '♪', 'bvb' `
@@ -15,10 +15,11 @@ function Get-FakkuURL {
         # Gets the filename and converts it to a parseable Fakku web URL
         # The filename must match exactly what is presented by Fakku or scrape will fail
         # Match and clean "[Artist] FileName (Comic XXX).ext"
+        # Also inadvertently removes titles in brackets, but that's a rare occurence
         if ($DoujinName -match '^\[(.*?)\]') {
                 $CleanFileName = (((((($DoujinName -split "]")[1])`
-                                                        -split "\(")[0]).Trim())`
-                                -replace '[^-a-z0-9 ]+', '')`
+                        -split "\(")[0]).Trim())`
+                        -replace '[^-a-z0-9 ]+', '')`
                         -replace ' ', '-'`
                         -replace '---', '-'`
                         -replace '--', '-'
@@ -27,7 +28,7 @@ function Get-FakkuURL {
         # Match and clean "FileName (Comic XXX).ext"
         elseif ($DoujinName -match '^\[(.*?)\]') {
                 $CleanFileName = (((($DoujinName -split "\(")[0]).Trim())`
-                                -replace '[^-a-z0-9 ]+', '')`
+                        -replace '[^-a-z0-9 ]+', '')`
                         -replace ' ', '-'`
                         -replace '---', '-'`
                         -replace '--', '-'
