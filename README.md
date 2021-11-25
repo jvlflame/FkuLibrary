@@ -5,7 +5,7 @@
 
 ## **DISCLAIMER: This project is still in its early stages and may be prone to breaking changes. Use at your own risk.**
 
-Scrape Fakku metadata and build your own local Fakku manga library with ComicRack (or Ubooquity).
+Scrape Fakku metadata and build your own local FAKKU manga library with ComicRack, Komga, Ubooquity, any other CMS that supports `ComicInfo.xml` metadata.
 Currently supports scraping directly from `Fakku.net`, with failover to `panda.chaika.moe`.
 
 `Set-FakkuMetadata` will write a `ComicInfo.xml` metadata file directly into your manga archive,
@@ -48,7 +48,7 @@ supporting filetypes: .zip, .cbz, .rar, .cbr, .7z, and .cb7.
 ### Prerequisites
 
 - [PowerShell 5.0 or higher (6.0+ recommended)](<(https://github.com/PowerShell/PowerShell)>)
-- ComicRack, Ubooquity, or any other CMS that supports `ComicInfo.xml` metadata
+- ComicRack, Komga, Ubooquity, or any other CMS that supports `ComicInfo.xml` metadata
 
 #### Accepted archive filenames
 
@@ -62,11 +62,11 @@ Manga Title.ext
 
 ### Installing
 
-[Clone the repository](https://github.com/jvlflame/Fakku-Library/archive/master.zip) and extract the
+[Clone the repository](https://github.com/jvlflame/FkuLibrary/archive/master.zip) and extract the
 files to a directory of your choice.
 
-[Download the chromedriver](https://chromedriver.chromium.org/downloads) version that matches your version of chrome as well as the [Selenium WebDriver for C#](https://goo.gl/uJJ5Sc). Extract `chromedriver.exe` and `WebDriver.dll` to a writable path (by default, it tries `C:\Selenium`).
-> Note: The `WebDriver.dll` file is found inside `\selenium-dotnet-3.14.0.zip\dist\Selenium.WebDriver.3.14.0.nupkg\lib\net45\`. The .nupkg file can be renamed to .zip for easier access. If the chromedriver.exe isn't working as expected, ensure the version matches with your Chrome browser. If they're matching and it still doesn't work, try downgrading your chromedriver.exe version or updating your Chrome.
+[Download the chromedriver](https://chromedriver.chromium.org/downloads) version that matches your version of chrome as well as the [Selenium WebDriver for C#](https://goo.gl/uJJ5Sc). Extract `chromedriver.exe` and `WebDriver.dll` to a readable/writable path (by default, it looks at `C:\Selenium`).
+> Note: The `WebDriver.dll` file is packaged inside `\selenium-dotnet-3.14.0.zip\dist\Selenium.WebDriver.3.14.0.nupkg\lib\net45\`. The .nupkg file can be treated like a .zip. If ChromeDriver isn't working as expected, ensure the version matches with your Chrome browser. If they match and it still doesn't work, try downgrading the `chromedriver.exe` version or updating Chrome.
 
 #### Import the module
 
@@ -107,3 +107,8 @@ Set-FakkuMetadata -FilePath "C:\path\to\file\file.cbz"
 Set-FakkuMetadata -Remote -FilePath "C:\path\to\file\file.cbz"
 ```
 > Note: Use this to circumvent chromedriver opening a new window everytime when setting metadata to individual archives. Make sure to open Chrome with the --remote-debugging-port argument (tries --remote-debugging-port=5656 by default) and login to FAKKU beforehand.
+
+#### Get example metadata from a Fakku link
+```
+Get-FakkuMetadata https://www.fakku.net/hentai/Bare-Girl-english
+```
