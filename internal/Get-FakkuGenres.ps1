@@ -5,11 +5,12 @@ function Get-FakkuGenres {
                 [String]$WebRequest
         )
 
-        $rawGenres = (((($WebRequest -split '<div class="row-right tags">')[1])`
-                                -split 'class="js-suggest-tag"')[0])
+        $rawGenres = (((($WebRequest -split '<div class="table-cell w-full align-top text-left -mb-2">')[1])`
+                -split 'class="inline-block cursor-pointer bg-gray-100 leading-loose rounded py-1 px-3 mr-2 dark:bg-gray-800 text-gray-900 dark:text-gray-400 js-suggest-tag"')[0])`
+                -replace "`n","" -replace "`r",""
 
         try {
-                $genres = ($rawGenres | Select-String -Pattern '(.*)<\/a>' -AllMatches).Matches | ForEach-Object { ($_.Groups[1].Value).Trim() }
+                $Genres = ($rawGenres | Select-String -Pattern '>([^<]*)<' -AllMatches).Matches | ForEach-Object { ($_.Groups[1].Value).Trim() } | Where-Object {$_ -ne ""}
         } catch {
                 # Do nothing
         }

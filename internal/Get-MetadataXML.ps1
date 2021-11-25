@@ -49,7 +49,7 @@ function Get-MetadataXML {
                 $Year = $Month = ""
         }
 
-        # Uses SeriesGroup instead of Series as I think Magazines/Events are less a discrete series and more a grouping of series. This also improves how Komga sorts.
+        # Changed to use SeriesGroup instead of Series for Magazines/Events as they're more a grouping of series than actual series. This greatly improves how Komga sorts.
         $Content = @"
 <?xml version="1.0"?>
 <ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
