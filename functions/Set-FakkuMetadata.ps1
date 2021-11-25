@@ -20,7 +20,7 @@ function Set-FakkuMetadata {
                 [Parameter(Mandatory = $false)]
                 [System.IO.FileInfo]$WebDriverPath = "C:\Selenium",
 
-                # Use this to circumvent chromedriver opening a new window everytime when individually setting metadata. Make sure to open Chrome and login to FAKKU beforehand with the --remote-debugging-port argument (--remote-debugging-port=5656 by default)
+                # To circumvent chromedriver opening a new window every time when individually setting metadata. Open Chrome and login to FAKKU beforehand with the --remote-debugging-port argument (--remote-debugging-port=5656 by default)
                 [Parameter(Mandatory = $false)]
                 [Switch]$Remote
         )
@@ -105,7 +105,7 @@ function Set-FakkuMetadata {
 
                 # Try to get credentials before falling back on panda.chaika.moe
                 catch {
-                        try{
+                        try {
                                 if (!$UriLocation) {
                                         Write-Warning "Attempting to use browser..."
                                         $FakkuUrl = Get-FakkuURL -DoujinName $File.BaseName
@@ -116,18 +116,13 @@ function Set-FakkuMetadata {
                                         if (($env:Path -split ';') -notcontains $WebDriverPath) {
                                                 $env:Path += ";$WebDriverPath"
                                         }
-                                    
                                         if (-Not (Test-Path -Path (Join-Path -Path $WebDriverPath -ChildPath "chromedriver.exe"))) {
                                                 Write-Warning "chromedriver.exe does not exist. Download the version matching your browser version and extract to your web driver path - https://chromedriver.chromium.org/downloads"
                                         }
-                                    
                                         if (-Not (Test-Path -Path (Join-Path -Path $WebDriverPath -ChildPath "WebDriver.dll"))) {
                                                 Write-Warning "WebDriver.dll does not exist. Download and extract WebDriver.dll from inside \selenium-dotnet-3.14.0.zip\dist\Selenium.WebDriver.3.14.0.nupkg\lib\net45\ to your web driver path - https://goo.gl/uJJ5Sc"
                                         }
-                                
-                                } 
-                                
-                                else {
+                                } else {
                                         Write-Warning "Web driver directory does not exist. Please set it using -WebDriverPath (C:\Selenium by default)"
                                 }
 
@@ -143,16 +138,13 @@ function Set-FakkuMetadata {
                                                 $ChromeOptions = New-Object OpenQA.Selenium.Chrome.ChromeOptions
                                                 $ChromeOptions.debuggerAddress = "127.0.0.1:5656"
                                                 $ChromeDriver = [OpenQA.Selenium.Chrome.ChromeDriver]::new($Service, $ChromeOptions)
-                                        } 
-                                        
-                                        else {
+                                        } else {
                                                 $ChromeDriver = [OpenQA.Selenium.Chrome.ChromeDriver]::new($Service)
                                                 $ChromeDriver.Navigate().GoToURL("https://fakku.net/login")
                                                 Write-Host -NoNewLine 'Please log into FAKKU then press any key to continue...'
                                                 $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
                                         }  
                                 }
-                                
                                 $ChromeDriver.Navigate().GoToURL($FakkuUrl)
                                 $xml = $null
                                 $xml = Get-MetadataXML -WebRequest $ChromeDriver.PageSource -Scraper Fakku -URL $FakkuUrl
@@ -160,7 +152,6 @@ function Set-FakkuMetadata {
                                 Write-FakkuLog -Log:$Log -LogPath $LogPath -Source "Fakku"
                                 Write-Verbose "Set $FilePath with $FakkuUrl"
                                 Write-Debug "Set $File using Fakku"
-
                         }
 
                         # If the Fakku URL returns an error, fallback to panda.chaika.moe
