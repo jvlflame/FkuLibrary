@@ -39,7 +39,7 @@ function Get-MetadataXML {
                 $Month = "`n  <Month>$Month</Month>"
         } 
 
-        elseif ($series -match "\b\d{4}\b") {
+        elseif ($Series -match "\b\d{4}\b") {
                 $Year = $matches[0]
                 $Year = "`n  <Year>$Year</Year>"
                 $Month = ""
