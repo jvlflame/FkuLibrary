@@ -1,17 +1,23 @@
 function Set-FakkuMetadata {
-        [CmdletBinding()]
+        [CmdletBinding(DefaultParametersetName="Set 1")]
         param(
-                [Parameter(Mandatory = $true, Position = 1)]
+                [Parameter(ParameterSetName="Set 1", Mandatory = $true, Position = 1)]
                 [System.IO.FileInfo]$FilePath,
 
-                [Parameter(Mandatory = $false)]
+                [Parameter(ParameterSetName="Set 1", Mandatory = $false)]
                 [String]$Url,
 
-                [Parameter(Mandatory = $false)]
+                [Parameter(ParameterSetName="Set 1", Mandatory = $false)]
                 [Switch]$Recurse,
 
                 [Parameter(Mandatory = $false)]
                 [Switch]$Log,
+
+                # Checks for a text file line by line for archive paths
+                # Optionally checks for a URL proceeding a ">" to use (e.g. "C:\path\to\file\file.cbz>https://www.fakku.net/hentai/hentai-name")
+                # Useful for rescraping metadata with previously found URLs or mass scraping
+                [Parameter(ParameterSetName="Set 2", Mandatory = $true, Position = 1)]
+                [System.IO.FileInfo]$InputFile,
 
                 [Parameter(Mandatory = $false)]
                 [System.IO.FileInfo]$LogPath = ".\fkulibrary.log",
@@ -42,18 +48,32 @@ function Set-FakkuMetadata {
         }
 
         $ProgressPreference = 'SilentlyContinue'
-        Write-Host "Starting Fakku metadata scraper on path: $FilePath"
 
         # Check if FilePath is a directory or file to determine how to proceed
-        if ((Get-Item -Path $FilePath) -is [System.IO.DirectoryInfo]) {
-                $Archive = Get-LocalArchives -FilePath $FilePath -Recurse:$Recurse
-        } else {
-                $Archive = Get-Item $FilePath
+        if ($FilePath) {
+                Write-Host "Starting Fakku metadata scraper on path: $FilePath"
+
+                if ((Get-Item -Path $FilePath) -is [System.IO.DirectoryInfo]) {
+                        $Archive = Get-LocalArchives -FilePath $FilePath -Recurse:$Recurse
+                } else {
+                        $Archive = Get-Item $FilePath
+                }
+
+                if (Test-Path -Path $FilePath -PathType Container) {
+                        if ($Url) {
+                                Write-Warning "Url parameter can only be used with a direct file path, not a directory..."
+                                return
+                        }
+                }
         }
 
-        if (Test-Path -Path $FilePath -PathType Container) {
-                if ($Url) {
-                        Write-Warning "Url parameter can only be used with a direct file path, not a directory..."
+        if ($InputFile) {
+                # Default separator for InputFile is ">"
+                $Separator = ">"
+                if ([System.IO.Path]::GetExtension($InputFile) -eq ".txt") {
+                        $Archive = Get-Content $InputFile      
+                } else {
+                        Write-Warning "The input file is not a text file"
                         return
                 }
         }
@@ -79,6 +99,35 @@ function Set-FakkuMetadata {
                         }
                         if ($UriLocation -eq 'panda.chaika') {
                                 $PandaChaikaUrl = $Url
+                        }
+                }
+
+                # Ideally would restructure to not be in main loop sorry
+                if ($File -match "(?<ArchivePath>.+(?=$Separator))$Separator(?<ArchiveURL>https[^$Separator]+)$") {
+                        if (Test-Path -Path $Matches.ArchivePath -PathType Leaf) {
+                                $File = Get-Item $Matches.ArchivePath
+                                $Url = $Matches.ArchiveURL
+                                if ($Url -match 'fakku') {
+                                        $UriLocation = 'fakku'
+                                        $FakkuUrl = $Url
+                                } elseif ($Url -match 'panda.chaika') {
+                                        $UriLocation = 'panda.chaika'
+                                        $PandaChaikaUrl = $Url
+                                } else {
+                                        Write-Warning "Url $Url is not a valid fakku or panda.chaika url"
+                                        return
+                                }
+                        } else {
+                                Write-Warning "$File is not a valid path"
+                                return
+                        }
+                        
+                } else {
+                        if (Test-Path -Path $File -PathType Leaf){
+                                $File = Get-Item $File
+                        } else {
+                                Write-Warning "$File is not a valid path"
+                                return
                         }
                 }
 
