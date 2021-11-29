@@ -102,32 +102,34 @@ function Set-FakkuMetadata {
                         }
                 }
 
-                # Ideally would restructure to not be in main loop sorry
-                if ($File -match "(?<ArchivePath>.+(?=$Separator))$Separator(?<ArchiveURL>https[^$Separator]+)$") {
-                        if (Test-Path -Path $Matches.ArchivePath -PathType Leaf) {
-                                $File = Get-Item $Matches.ArchivePath
-                                $Url = $Matches.ArchiveURL
-                                if ($Url -match 'fakku') {
-                                        $UriLocation = 'fakku'
-                                        $FakkuUrl = $Url
-                                } elseif ($Url -match 'panda.chaika') {
-                                        $UriLocation = 'panda.chaika'
-                                        $PandaChaikaUrl = $Url
+                # Ideally would restructure to not be in main loop sorry. Also kinda bad tbh lol
+                if ($InputFile) {
+                        if ($File -match "(?<ArchivePath>.+(?=$Separator))$Separator(?<ArchiveURL>https[^$Separator]+)$") {
+                                if (Test-Path -Path $Matches.ArchivePath -PathType Leaf) {
+                                        $File = Get-Item $Matches.ArchivePath
+                                        $Url = $Matches.ArchiveURL
+                                        if ($Url -match 'fakku') {
+                                                $UriLocation = 'fakku'
+                                                $FakkuUrl = $Url
+                                        } elseif ($Url -match 'panda.chaika') {
+                                                $UriLocation = 'panda.chaika'
+                                                $PandaChaikaUrl = $Url
+                                        } else {
+                                                Write-Warning "Url $Url is not a valid fakku or panda.chaika url"
+                                                return
+                                        }
                                 } else {
-                                        Write-Warning "Url $Url is not a valid fakku or panda.chaika url"
+                                        Write-Warning "$File is not a valid path"
                                         return
                                 }
+                                
                         } else {
-                                Write-Warning "$File is not a valid path"
-                                return
-                        }
-                        
-                } else {
-                        if (Test-Path -Path $File -PathType Leaf){
-                                $File = Get-Item $File
-                        } else {
-                                Write-Warning "$File is not a valid path"
-                                return
+                                if (Test-Path -Path $File -PathType Leaf){
+                                        $File = Get-Item $File
+                                } else {
+                                        Write-Warning "$File is not a valid path"
+                                        return
+                                }
                         }
                 }
 
