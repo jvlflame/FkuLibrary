@@ -6,7 +6,7 @@ function Get-FakkuURL {
         )
         # Added other special character exceptions
         # It looks like some links convert apostrophes (') to 'bgb' while some don't. Can't really be bothered to write an elegant solution that checks both link possibilites
-        $DoujinName -replace '★', 'bzb' `
+        $DoujinName = $DoujinName -replace '★', 'bzb' `
                 -replace '☆', 'byb' `
                 -replace '♪', 'bvb' `
                 -replace '↑', 'b' `
@@ -19,21 +19,24 @@ function Get-FakkuURL {
         if ($DoujinName -match '^\[.*?\]') {
                 $CleanFileName = ((((($DoujinName -split "]")[1])`
                         -split "\(")[0]).Trim())`
+                        -replace '[^-a-z0-9 ]+', ''`
                         -replace ' ', '-'`
-                        -replace '--{2,}', '-'
+                        -replace '-{2,}', '-'
         }
 
         # Match and clean "FileName (Comic XXX).ext"
         elseif ($DoujinName -match '\(') {
                 $CleanFileName = ((($DoujinName -split "\(")[0]).Trim())`
+                        -replace '[^-a-z0-9 ]+', ''`
                         -replace ' ', '-'`
-                        -replace '--{2,}', '-'
+                        -replace '-{2,}', '-'
 }
 
         # Match and clean "FileName.ext"
         elseif ($DoujinName -match '^[a-zA-Z0-9]') {
                 $CleanFileName = $DoujinName -replace ' ', '-'`
-                        -replace '--{2,}', '-'
+                        -replace '[^-a-z0-9 ]+', ''`
+                        -replace '-{2,}', '-'
         }
 
         if ($CleanFileName.Substring($CleanFileName.Length - 1) -match "-") {

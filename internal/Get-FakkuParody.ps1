@@ -9,7 +9,7 @@ function Get-FakkuParody {
         $Parody = (((($WebRequest -split '<a.*series.*?>')[1])`
             -split '<\/a>')[0]).Trim()`
             -replace ',', ''`
-            -replace '&', '&amp;'
+            -replace '&(?!amp;)', '&amp;'
 
         Write-Output $Parody
 }
