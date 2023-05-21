@@ -1,104 +1,112 @@
 function Get-FakkuMetadata {
-    [CmdletBinding(DefaultParameterSetName = 'Url')]
-    param (
+    [CmdletBinding(DefaultParameterSetName = 'URL')]
+    param(
         [Parameter(Mandatory = $false, Position = 0, ParameterSetName = 'Name')]
-        [String]$DoujinName,
+        [String]$ComicName,
 
-        [Parameter(Mandatory = $false, Position = 0, ParameterSetName = 'Url')]
-        [String]$Url,
+        [Parameter(Mandatory = $false, Position = 0, ParameterSetName = 'URL')]
+        [String]$URL,
 
-        # Sets path to chromedriver.exe and WebDriver.dll
-        [Parameter(Mandatory = $false)]
-        [System.IO.FileInfo]$WebDriverPath = "C:\Selenium",
+        [Parameter(Mandatory = $false, ParameterSetName = 'URL')]
+        [System.IO.DirectoryInfo]$WebDriverPath = (Get-Item $PSScriptRoot).Parent,
 
-        # To circumvent chromedriver opening a new window every time when individually setting metadata. Open Chrome and login to FAKKU beforehand with the --remote-debugging-port argument (--remote-debugging-port=5656 by default)
-        [Parameter(Mandatory = $false)]
-        [Switch]$Remote
+        [Parameter(Mandatory = $false, ParameterSetName = 'URL')]
+        [Switch]$Persist,
+
+        # Ensure the profile isn't currently in use or this option will not work.
+        [Parameter(Mandatory = $false, ParameterSetName = 'URL')]
+        [Switch]$UserProfile,
+
+        [Parameter(Mandatory = $false, ParameterSetName = 'URL')]
+        [Switch]$Incognito
     )
 
     Switch ($PSCmdlet.ParameterSetName) {
         'Name' {
             try {
-                $fakkuUrl = Get-FakkuURL -DoujinName $DoujinName
-                $fakkuData = Invoke-WebRequest $fakkuUrl -Method Get -Verbose:$false
-                $xml = Get-MetadataXML -WebRequest $fakkuData -Scraper Fakku -URL $fakkuUrl
+                $FakkuURL = Get-FakkuURL -ComicName $ComicName
+                $FakkuData = (Invoke-WebRequest -Uri $FakkuURL -Method Get -Verbose:$false).Content
+                $XML = Get-MetadataXML -WebRequest $FakkuData -URL $FakkuURL
             } catch {
-                try {
-                    $pandaChaikaUrl = Get-PandaChaikaURL -DoujinName $DoujinName
-                    $pandaChaikaData = Invoke-WebRequest $pandaChaikaUrl -Method Get -Verbose:$false
-                    $xml = Get-MetadataXML -Webrequest $pandaChaikaData -Scraper PandaChaika
-                } catch {
-                    Write-Warning "Doujin $DoujinName not found..."
-                    return
-                }
+                Write-Warning "Comic $ComicName not found."
+                return
             }
-
-            Write-Output $xml
+            Write-Output $XML
         }
 
-        'Url' {
+        'URL' {
             try {
-                if ($Url -match 'fakku') {
-                    $fakkuData = Invoke-WebRequest $Url -Method Get -Verbose:$false
-                    $xml = Get-MetadataXML -WebRequest $fakkuData -Scraper Fakku -URL $Url
-                } elseif ($Url -match 'panda.chaika') {
-                    $pandaChaikaData = Invoke-WebRequest $Url -Method Get -Verbose:$false
-                    $xml = Get-MetadataXML -Webrequest $pandaChaikaData -Scraper PandaChaika
+                if ($URL -match 'fakku') {
+                    $FakkuData = (Invoke-WebRequest -Uri $URL -Method Get -Verbose:$false).Content
+                    $XML = Get-MetadataXML -WebRequest $FakkuData -URL $URL
                 } else {
-                    Write-Warning "Url $Url is not a valid fakku or panda.chaika url"
+                    Write-Warning "URL $URL is not a valid FAKKU URL."
                 }
             } catch {
-                try {      
-                        # Test for and adds web driver directory to PATH
-                        if (Test-Path -Path $WebDriverPath) {
-                                if (($env:Path -split ';') -notcontains $WebDriverPath) {
-                                        $env:Path += ";$WebDriverPath"
-                                }
-                            
-                                if (-Not (Test-Path -Path (Join-Path -Path $WebDriverPath -ChildPath "chromedriver.exe"))) {
-                                        Write-Warning "chromedriver.exe does not exist. Download the version matching your browser version and extract to your web driver path - https://chromedriver.chromium.org/downloads"
-                                }
-                            
-                                if (-Not (Test-Path -Path (Join-Path -Path $WebDriverPath -ChildPath "WebDriver.dll"))) {
-                                        Write-Warning "WebDriver.dll does not exist. Download and extract WebDriver.dll from inside \selenium-dotnet-3.14.0.zip\dist\Selenium.WebDriver.3.14.0.nupkg\lib\net45\ to your web driver path - https://goo.gl/uJJ5Sc"
-                                }
-                        
-                        } else {
-                                Write-Warning "Web driver directory does not exist. Please set it using -WebDriverPath (C:\Selenium by default)"
-                        }
+                try {
+                    Write-Host "Attempting to use browser..."
+                    try {
+                        Add-Type -Path (Get-Item (Join-Path -Path $WebDriverPath -ChildPath 'webdriver.dll'))
+                        $WebDriverExe = Get-Item (Join-Path -Path $WebDriverPath -ChildPath '*driver.exe') |
+                            Select-Object -First 1
+                    } catch {
+                        Write-Warning "Can't find WebDriver.dll or executable."
+                        return
+                    }
 
-                        # Opens a new window if it doesn't detect one open.
-                        if ([string]::IsNullOrEmpty($ChromeDriver.WindowHandles)) {
-                        $DllPath = Join-Path -Path $WebDriverPath -ChildPath "WebDriver.dll"
-                                Write-Host "Starting browser..."
-                                Import-Module $DllPath
-                                $Service = [OpenQA.Selenium.Chrome.ChromeDriverService]::CreateDefaultService($WebDriverPath)
-                                $Service.SuppressInitialDiagnosticInformation = $true
-                                $Service.HideCommandPromptWindow = $true
-                                if ($Remote) {
-                                        $ChromeOptions = New-Object OpenQA.Selenium.Chrome.ChromeOptions
-                                        $ChromeOptions.debuggerAddress = "127.0.0.1:5656"
-                                        $ChromeDriver = [OpenQA.Selenium.Chrome.ChromeDriver]::new($Service, $ChromeOptions)
-                                } else {
-                                        $ChromeDriver = [OpenQA.Selenium.Chrome.ChromeDriver]::new($Service)
-                                        $ChromeDriver.Navigate().GoToURL("https://fakku.net/login")
-                                        Write-Host -NoNewLine 'Please log into FAKKU then press any key to continue...'
-                                        $null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-                                }  
+                    Switch ($WebDriverExe.Name) {
+                        'msedgedriver.exe' {
+                            $DriverOptions = New-Object OpenQA.Selenium.Edge.EdgeOptions
+                            $DriverService = [OpenQA.Selenium.Edge.EdgeDriverService]::CreateDefaultService($WebDriverPath)
+                            $Driver = [OpenQA.Selenium.Edge.EdgeDriver]
+                            if ($UserProfile) {
+                                $DriverOptions.AddArgument("user-data-dir=$env:LOCALAPPDATA\Microsoft\Edge\User Data")
+                                $DriverOptions.AddArgument("profile-directory=$UserProfile")
+                            }
+                            if ($Incognito) {$DriverOptions.AddArgument("inprivate")}
                         }
-                        $ChromeDriver.Navigate().GoToURL($Url)
-                        $xml = Get-MetadataXML -WebRequest $ChromeDriver.PageSource -Scraper Fakku -URL $Url
-                } 
+                        'chromedriver.exe' {
+                            $DriverOptions = New-Object OpenQA.Selenium.Chrome.ChromeOptions
+                            $DriverService = [OpenQA.Selenium.Chrome.ChromeDriverService]::CreateDefaultService($WebDriverPath)
+                            $Driver = [OpenQA.Selenium.Chrome.ChromeDriver]
+                            if ($UserProfile) {
+                                $DriverOptions.AddArgument("user-data-dir=$env:LOCALAPPDATA\Google\Chrome\User Data")
+                                $DriverOptions.AddArgument("profile-directory=$UserProfile")
+                            }
+                            if ($Incognito) {$DriverOptions.AddArgument("incognito")}
+                        }
+                        'geckodriver.exe' {
+                            $DriverOptions = New-Object OpenQA.Selenium.firefox.FirefoxOptions
+                            $DriverService = [OpenQA.Selenium.firefox.FirefoxDriverService]::CreateDefaultService($WebDriverPath)
+                            $Driver = [OpenQA.Selenium.firefox.FirefoxDriver]
+                            if ($UserProfile) {$DriverOptions.AddArgument("P $UserProfile")}
+                            if ($Incognito) {$DriverOptions.AddArgument("private")}
+                        }
+                        Default {
+                            Write-Warning "Couldn't find compatible WebDriver executable."
+                            return
+                        }
+                    }
+
+                    $Service.SuppressInitialDiagnosticInformation = $true
+                    $Service.HideCommandPromptWindow = $true
+
+                    # Initialize new WebDriver if can't find one
+                    if ([string]::IsNullOrEmpty($WebDriver.WindowHandles)) {
+                        $WebDriver = New-Object $Driver -ArgumentList @($DriverService, $DriverOptions)
+                    }
+                    $WebDriver.Navigate().GoToURL("https://fakku.net/login")
+                    Write-Host "Please log into FAKKU then press any key to continue..."
+                    [Void]$Host.UI.RawUI.ReadKey("NoEcho, IncludeKeyDown")
+                    $WebDriver.Navigate().GoToURL($URL)
+                    $XML = Get-MetadataXML -WebRequest $WebDriver.PageSource -URL $URL
+                    if (-Not $Persist) {$WebDriver.Quit()}
+                }
                 catch {
-                    Write-Warning "Error occurred while scraping $Url : $PSItem"
+                    Write-Warning "Error occurred while scraping $URL : $PSItem"
                 }
             }
-
-            Write-Output $xml
-
-            if ($ChromeDriver) {
-                $ChromeDriver.Quit()
-            }
+            Write-Output $XML
         }
     }
 }

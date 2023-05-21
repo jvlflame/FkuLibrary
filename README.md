@@ -1,23 +1,6 @@
-# Fakku-Library
+# FAKKU metadata scraper
 
-[![Last commit](https://img.shields.io/github/last-commit/jvlflame/Fakku-Library?style=flat-square)](https://github.com/jvlflame/Fakku-Library/commits/master)
-[![Discord](https://img.shields.io/discord/608449512352120834?style=flat-square)](https://discord.gg/K2Yjevk)
-
-## **DISCLAIMER: This project is still in its early stages and may be prone to breaking changes. Use at your own risk.**
-
-Scrape Fakku metadata and build your own local FAKKU manga library with ComicRack, Komga, Ubooquity, any other CMS that supports `ComicInfo.xml` metadata.
-Currently supports scraping directly from `Fakku.net`, with failover to `panda.chaika.moe`.
-
-`Set-FakkuMetadata` will write a `ComicInfo.xml` metadata file directly into your manga archive,
-supporting filetypes: .zip, .cbz, .rar, .cbr, .7z, and .cb7.
-
-## Demo
-
-![Demo-ComicRack](/other/demo-comicrack.jpg)
-
-![Demo-Gif](/other/demo-usage.gif)
-
-### Sample ComicInfo.xml file
+Scrape metadata from FAKKU.net and build your own local FAKKU manga library with Komga or any other CMS that supports `ComicInfo.xml` metadata.
 
 ```
 <?xml version="1.0"?>
@@ -29,8 +12,8 @@ supporting filetypes: .zip, .cbz, .rar, .cbr, .7z, and .cb7.
   <Month>03</Month>
   <Writer>Tsukako</Writer>
   <Publisher>FAKKU</Publisher>
-  <Genre>vanilla, booty, busty, stockings, creampie, uncensored, unlimited, blowjob, hentai, lingerie, cosplay</Genre>
-  <Web>https://www.fakku.net/hentai/Bare-Girl-english</Web>
+  <Tags>Blowjob, Booty, Busty, Cosplay, Creampie, Hentai, Lingerie, Slice of Life, Stockings, Uncensored, Vanilla</Tags>
+  <Web>https://www.fakku.net/hentai/bare-girl-english</Web>
   <LanguageISO>en</LanguageISO>
   <Manga>Yes</Manga>
   <SeriesGroup>Comic Kairakuten BEAST 2017-03</SeriesGroup>
@@ -38,77 +21,94 @@ supporting filetypes: .zip, .cbz, .rar, .cbr, .7z, and .cb7.
 </ComicInfo>
 ```
 
-## Table of Contents:
-
-- [Getting Started](#Getting-Started)
-- [Usage](#Usage)
-
 ## Getting Started
 
 ### Prerequisites
 
-- [PowerShell 5.0 or higher (6.0+ recommended)](<(https://github.com/PowerShell/PowerShell)>)
-- ComicRack, Komga, Ubooquity, or any other CMS that supports `ComicInfo.xml` metadata
+- [PowerShell 5.0 or higher (6.0+ recommended)](https://aka.ms/powershell-release?tag=stable)
+- Komga or any other CMS that supports `ComicInfo.xml` metadata
 
 #### Accepted archive filenames
 
-```
-[Author] Manga Title (Comic XXX).ext
+- `[Artist] Title (Comic XXX).ext`
+- `Title (Comic XXX).ext`
+- `Title.ext`
 
-Manga Title (Comic XXX).ext
+#### Supported filetypes
+- `.zip`
+- `.cbz`
+- `.rar`
+- `.cbr`
+- `.7z`
+- `.cb7.`
 
-Manga Title.ext
-```
+## Setup
 
-### Installing
+#### Clone the repository
 
-[Clone the repository](https://github.com/jvlflame/FkuLibrary/archive/master.zip) and extract the
+- [Clone the repository](https://github.com/shrublet/fakku-meta-scraper/archive/refs/heads/main.zip) and extract the
 files to a directory of your choice.
 
-[Download the chromedriver](https://chromedriver.chromium.org/downloads) version that matches your version of chrome as well as the [Selenium WebDriver for C#](https://goo.gl/uJJ5Sc). Extract `chromedriver.exe` and `WebDriver.dll` to a readable/writable path (by default, it looks at `C:\Selenium`).
-> Note: The `WebDriver.dll` file is packaged inside `\selenium-dotnet-3.14.0.zip\dist\Selenium.WebDriver.3.14.0.nupkg\lib\net45\`. The .nupkg file can be treated like a .zip. If ChromeDriver isn't working as expected, ensure the version matches with your Chrome browser. If they match and it still doesn't work, try downgrading the `chromedriver.exe` version or updating Chrome.
+
+
+#### Setup Selenium WebDriver
+
+- It's highly recommneded to setup and download Selenium as well to access publicly blocked pages. Download the WebDriver for your browser and the Selenium for C# package. Extract the WebDriver executable (for Google Chrome, this will be `chromedriver.exe`) and `WebDriver.dll` from the `.nupkg` package to either the root of the cloned repository (i.e. `.\fakku-meta-scraper\`) or a directory of your choice.
+
+> <sub>The `WebDriver.dll` is packaged inside `.nupkg` file under `.\lib\net48` and can be opened via any file archiver. Most Windows PCs should have .NET 4.8, so this is the recommended library. If the WebDriver isn't working as expected, ensure the version matches with your browser or try updating your browser/downgrading the WebDriver.</sub>
+
+<sub>[Browser WebDriver executables](https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/#quick-reference) [^1]</sub>
+
+<sup>[Selenium WebDriver for C#](https://www.nuget.org/packages/Selenium.WebDriver)</sup>
+
+[^1]: Currently only supports Google Chrome, Microsoft Edge, and Firefox.
 
 #### Import the module
 
-You will need to do this every time you close your PowerShell window unless you add the module to
+- You will need to do this every time you close your PowerShell window unless you add the module to
 your PowerShell module PATH
 
 ```
-Import-Module Fakku-Library.psm1
+Import-Module Fakku-Scraper.psm1
 ```
 
-## Usage
+## Usage examples
 
-To run the module, use PowerShell 5.0 or higher.
+#### Set metadata for an archive
 
-### Examples
+```
+Set-FakkuMetadata -FilePath "C:\path\to\file.zip"
+```
 
-#### Set metadata for archives in specified filepath
+#### Set metadata for archives in specified filepath (supports recursion via `-Recurse`)
 
 ```
 Set-FakkuMetadata -FilePath "C:\path\to\files\"
 ```
 
-#### Set metadata for archives in specified filepath recursively
+#### Set metadata for an archive from a FAKKU link
 
 ```
-Set-FakkuMetadata -FilePath "C:\path\to\files\" -Recurse
+Set-FakkuMetadata -FilePath "C:\path\to\file.zip" -URL https://www.fakku.net/hentai/Bare-Girl-english
 ```
 
-#### Set metadata for a single archive
+#### Get example metadata from a FAKKU link
 
-```
-Set-FakkuMetadata -FilePath "C:\path\to\file\file.cbz"
-```
-
-#### Set metadata for archives in specified filepath using an open instance of Chrome
-
-```
-Set-FakkuMetadata -Remote -FilePath "C:\path\to\file\file.cbz"
-```
-> Note: Use this to circumvent chromedriver opening a new window everytime when setting metadata to individual archives. Make sure to open Chrome with the --remote-debugging-port argument (tries --remote-debugging-port=5656 by default) and login to FAKKU beforehand.
-
-#### Get example metadata from a Fakku link
 ```
 Get-FakkuMetadata https://www.fakku.net/hentai/Bare-Girl-english
 ```
+
+#### Get example metadata from a comic title
+
+```
+Get-FakkuMetadata "Bare Girl"
+```
+
+
+#### Set metadata for an archive while using WebDriver in incognito mode
+
+```
+Set-FakkuMetadata -FilePath "C:\path\to\file\file.zip" -Incognito
+```
+
+

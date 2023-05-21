@@ -8,7 +8,7 @@ function Get-FakkuLinks {
         [Switch]$Recurse,
 
         [Parameter(Position = 0, ParameterSetName = 'Name')]
-        [String]$DoujinName
+        [String]$ComicName
     )
 
     begin {
@@ -21,16 +21,14 @@ function Get-FakkuLinks {
         switch ($PSCmdlet.ParameterSetName) {
             'Name' {
                 [PSCustomObject]@{
-                    Fakku = Get-FakkuUrl -DoujinName $DoujinName
-                    Panda = Get-PandaChaikaUrl -DoujinName $DoujinName
+                    Fakku = Get-FakkuUrl -ComicName $ComicName
                 }
             }
 
             'Path' {
                 foreach ($File in $Archives) {
                     [PSCustomObject]@{
-                        Fakku = Get-FakkuUrl -DoujinName $File.BaseName
-                        Panda = Get-PandaChaikaUrl -DoujinName $File.BaseName
+                        Fakku = Get-FakkuUrl -ComicName $File.BaseName
                     }
                 }
             }
