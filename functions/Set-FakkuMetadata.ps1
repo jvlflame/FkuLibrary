@@ -11,14 +11,13 @@ function Set-FakkuMetadata {
         [String]$URL,
 
         [Parameter(Mandatory = $false)]
-        [System.IO.FileInfo]$WebDriverPath = (Get-Item $PSScriptRoot).Parent,
+        [Int32]$Sleep,
 
         [Parameter(Mandatory = $false)]
-        [Switch]$Persist,
+        [System.IO.DirectoryInfo]$WebDriverPath = (Get-Item $PSScriptRoot).Parent,
 
-        # Ensure the profile isn't currently in use or this option will not work.
-        [Parameter(Mandatory = $false)]
-        [Switch]$UserProfile,
+        [Parameter(Mandatory = $false, ParameterSetName = 'URL')]
+        [System.IO.DirectoryInfo]$UserProfile = (Join-Path -Path (Get-Item $PSScriptRoot).Parent -ChildPath "profiles"),
 
         [Parameter(Mandatory = $false)]
         [Switch]$Incognito
@@ -34,16 +33,12 @@ function Set-FakkuMetadata {
         $Archive = Get-Item $FilePath
     }
 
-    if (Test-Path -Path $FilePath -PathType Container) {
-        if ($Url) {
-            Write-Warning "URL parameter can only be used with a direct file path, not a directory."
-            return
-        }
-    }
-
     if ($PSBoundParameters.ContainsKey('URL')) {
-        if (-Not $URL -match 'fakku') {
-            Write-Warning "URL $URL is not a valid FAKKU URL."
+        if (Test-Path -Path $FilePath -PathType Container) {
+            Write-Warning "URL parameter can only be used with an archive, not a directory."
+            return
+        } elseif (-Not $URL -match 'fakku') {
+            Write-Warning "URL ""$URL"" is not a valid FAKKU URL."
             return
         }
     }
@@ -51,24 +46,25 @@ function Set-FakkuMetadata {
     $Index = 1
     $TotalIndex = $Archive.Count
     foreach ($File in $Archive) {
-        $ComicName = $File.BaseName
+        $Name = $File.BaseName
         $XMLPath = Join-Path -Path $File.DirectoryName -ChildPath 'ComicInfo.xml'
 
         Write-Debug "$XMLPath"
-        Write-Host "[$Index of $TotalIndex] Setting metadata for $ComicName"
+        Write-Host "[$Index of $TotalIndex] Setting metadata for ""$Name"""
+
+        Start-Sleep -Seconds $Sleep
 
         try {
-            if (!$URL) {$URL = Get-FakkuURL -ComicName $File.BaseName}
-            $WebRequest = (Invoke-WebRequest -Uri $URL -Method Get -Verbose:$false).Content
-            $XML = Get-MetadataXML -WebRequest $WebRequest.Content -URL $URL
+            if (!$URL) {$FakkuURL = Get-FakkuURL -Name $File.BaseName}
+            $WebRequest = (Invoke-WebRequest -Uri $FakkuURL -Method Get -Verbose:$false).Content
+            $XML = Get-MetadataXML -WebRequest $WebRequest -URL $FakkuURL
             Set-MetadataXML -FilePath $File.FullName -XMLPath $XMLPath -Content $XML
-            Write-Verbose "Set $FilePath with $URL."
+            Write-Verbose "Set $FilePath with $FakkuURL."
         }
 
         # Fallback and use WebDriver
         catch {
             try {
-                if (!$URL) {$URL = Get-FakkuURL -ComicName $File.BaseName}
                 Write-Host "Attempting to use browser..."
 
                 try {
@@ -85,20 +81,16 @@ function Set-FakkuMetadata {
                         $DriverOptions = New-Object OpenQA.Selenium.Edge.EdgeOptions
                         $DriverService = [OpenQA.Selenium.Edge.EdgeDriverService]::CreateDefaultService($WebDriverPath)
                         $Driver = [OpenQA.Selenium.Edge.EdgeDriver]
-                        if ($UserProfile) {
-                            $DriverOptions.AddArgument("user-data-dir=$env:LOCALAPPDATA\Microsoft\Edge\User Data")
-                            $DriverOptions.AddArgument("profile-directory=$UserProfile")
-                        }
+                        $ProfilePath = Join-Path -Path $UserProfile -ChildPath "Edge"
+                        $DriverOptions.AddArgument("user-data-dir=$ProfilePath")
                         if ($Incognito) {$DriverOptions.AddArgument("inprivate")}
                     }
                     'chromedriver.exe' {
                         $DriverOptions = New-Object OpenQA.Selenium.Chrome.ChromeOptions
                         $DriverService = [OpenQA.Selenium.Chrome.ChromeDriverService]::CreateDefaultService($WebDriverPath)
                         $Driver = [OpenQA.Selenium.Chrome.ChromeDriver]
-                        if ($UserProfile) {
-                            $DriverOptions.AddArgument("user-data-dir=$env:LOCALAPPDATA\Google\Chrome\User Data")
-                            $DriverOptions.AddArgument("profile-directory=$UserProfile")
-                        }
+                        $ProfilePath = Join-Path -Path $UserProfile -ChildPath "Chrome"
+                        $DriverOptions.AddArgument("user-data-dir=$ProfilePath")
                         if ($Incognito) {$DriverOptions.AddArgument("incognito")}
                     }
                     'geckodriver.exe' {
@@ -106,6 +98,8 @@ function Set-FakkuMetadata {
                         $DriverService = [OpenQA.Selenium.firefox.FirefoxDriverService]::CreateDefaultService($WebDriverPath)
                         $Driver = [OpenQA.Selenium.firefox.FirefoxDriver]
                         if ($UserProfile) {$DriverOptions.AddArgument("P $UserProfile")}
+                        $ProfilePath = Join-Path -Path $UserProfile -ChildPath "Firefox"
+                        $DriverOptions.AddArgument("profile $ProfilePath")
                         if ($Incognito) {$DriverOptions.AddArgument("private")}
                     }
                     Default {
@@ -113,24 +107,27 @@ function Set-FakkuMetadata {
                         return
                     }
                 }
-                $Service.SuppressInitialDiagnosticInformation = $true
-                $Service.HideCommandPromptWindow = $true
-                if ([string]::IsNullOrEmpty($WebDriver.WindowHandles)) {
+
+                $DriverService.SuppressInitialDiagnosticInformation = $true
+                $DriverService.HideCommandPromptWindow = $true
+                # Initialize new WebDriver if can't find one
+                if (-Not $WebDriver.WindowHandles) {
                     $WebDriver = New-Object $Driver -ArgumentList @($DriverService, $DriverOptions)
+                    $WebDriver.Navigate().GoToURL("https://fakku.net/login")
+                    Write-Host "Please log into FAKKU then press any key to continue..."
+                    [Void]$Host.UI.RawUI.ReadKey("NoEcho, IncludeKeyDown")
                 }
-                Write-Host "Please log into FAKKU then press any key to continue..."
-                [Void]$Host.UI.RawUI.ReadKey("NoEcho, IncludeKeyDown")
-                $WebDriver.Navigate().GoToURL("https://fakku.net/login")
-                $WebDriver.Navigate().GoToURL($URL)
-                $XML = Get-MetadataXML -WebRequest $WebDriver.PageSource -URL $URL
-                if (-Not $Persist) {$WebDriver.Quit()}
+                if (!$URL) {$FakkuURL = Get-FakkuURL -Name $File.BaseName}
+                $WebDriver.Navigate().GoToURL($FakkuURL)
+                $XML = Get-MetadataXML -WebRequest $WebDriver.PageSource -URL $FakkuURL
                 Set-MetadataXML -FilePath $File.FullName -XMLPath $XMLPath -Content $XML
-                Write-Verbose "Set $FilePath with $URL."
+                Write-Verbose "Set $FilePath with $FakkuURL."
             } catch {
-                Write-Warning "Error occurred while scraping $URL : $PSItem"
+                Write-Warning "Error occurred while scraping $FakkuURL : $PSItem"
             }
         }
         $Index++
     }
+    if ($WebDriver) {$WebDriver.Quit()}
     Write-Host "Complete."
 }

@@ -89,7 +89,7 @@ Import-Module .\Fakku-Scraper.psm1
 
 ## Usage
 
-#### Sets metadata for archive(s)
+#### Set metadata for archive(s)
 
 ```sh
 Set-FakkuMetadata
@@ -100,12 +100,12 @@ Set-FakkuMetadata
 [`-FilePath`](#-filepath-positional)
 [`-Recurse`](#-recurse)
 [`-URL`](#-url)
+[`-Sleep`](#-sleep)
 [`-WebDriverPath`](#-webdriverpath)
-[`-Persist`](#-persist)
 [`-UserProfile`](#-userprofile)
 [`-Incognito`](#-incognito)
 
-#### Retrieves and writes metadata to the console
+#### Retrieve and write metadata to the console
 
 ```sh
 Get-FakkuMetadata
@@ -113,14 +113,13 @@ Get-FakkuMetadata
 
 ###### Available parameters
 
-[`-ComicName`](#-comicname-positional)
+[`-Name`](#-name-positional)
 [`-URL`](#-url)
 [`-WebDriverPath`](#-webdriverpath)
-[`-Persist`](#-persist)
 [`-UserProfile`](#-userprofile)
 [`-Incognito`](#-incognito)
 
-#### Returns corresponding FAKKU links for archive(s)
+#### Return corresponding FAKKU links for archive(s)
 
 ```sh
 Get-FakkuLinks
@@ -129,7 +128,7 @@ Get-FakkuLinks
 ###### Available parameters
 
 [`-FilePath`](#-filepath-positional)
-[`-ComicName`](#-comicname-positional)
+[`-Name`](#-name-positional)
 [`-Recurse`](#-recurse)
 
 <br/><br/>
@@ -142,7 +141,7 @@ Get-FakkuLinks
 Set-FakkuMetadata -FilePath "C:\path\to\file.zip"
 ```
 
-#### Set metadata for archives in specified filepath
+#### Set metadata for archives in specified directory
 
 ```sh
 Set-FakkuMetadata -FilePath "C:\path\to\files"
@@ -154,13 +153,13 @@ Set-FakkuMetadata -FilePath "C:\path\to\files"
 Set-FakkuMetadata "C:\path\to\file.zip" -URL "https://www.fakku.net/hentai/Bare-Girl-english"
 ```
 
-#### Get example metadata from a FAKKU link
+#### Get metadata from a FAKKU link
 
 ```sh
 Get-FakkuMetadata https://www.fakku.net/hentai/Bare-Girl-english
 ```
 
-#### Get example metadata from a comic title
+#### Get metadata from a title
 
 ```sh
 Get-FakkuMetadata "Bare Girl"
@@ -173,12 +172,6 @@ Get-FakkuMetadata "Bare Girl"
 Set-FakkuMetadata "C:\path\to\file\file.zip" -Incognito
 ```
 
-#### Set metadata for an archive while using WebDriver with the default browser profile
-
-```sh
-Set-FakkuMetadata "C:\path\to\file\file.zip" -Profile "Default"
-```
-
 <br/><br/>
 
 ## Parameter Descriptions
@@ -186,7 +179,7 @@ Set-FakkuMetadata "C:\path\to\file\file.zip" -Profile "Default"
 - ##### `-FilePath` (positional)
 > Archive or directory or archives to set metadata for
 
-- ##### `-ComicName` (positional)
+- ##### `-Name` (positional)
 > Work title to search FAKKU for
 
 - ##### `-Recurse`
@@ -195,14 +188,14 @@ Set-FakkuMetadata "C:\path\to\file\file.zip" -Profile "Default"
 - ##### `-URL`
 > A FAKKU url to pull metadata from
 
-- ##### `-WebDriverPath`
-> Specifies path where `WebDriver.dll` and `driver.exe` are located (default: `.\fakku-meta-scraper`).
+- ##### `-Sleep`
+> Time to sleep between scrapes
 
-- ##### `-Persist`
-> Keeps the WebDriver browser window open (useful for many invdidual scrapes)
+- ##### `-WebDriverPath`
+> Specifies path to `WebDriver.dll` and `driver.exe` (default: `.`)
 
 - ##### `-UserProfile`
-> Specify a browser profile to use (profile must not be in use or this option will not work)
+> Specifies path to save browser profiles to (default: `.\profiles`)
 
 - ##### `-Incognito`
-> Launches WebDriver in incognito/private mode
+> Launches browser in incognito/private mode

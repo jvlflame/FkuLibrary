@@ -5,11 +5,9 @@ function Get-FakkuSeries {
         [String]$WebRequest
     )
 
-    $Series = ((($WebRequest -split '<a href="\/magazines\/.*?>')[1]) -split '<\/a>')[0].Trim()
-
-    # Will use event instead if there is no magazine
-    if ([string]::IsNullOrEmpty($Series)) {
-        $Series = ((($WebRequest -split '<a href="\/events\/.*?>')[1]) -split '<\/a>')[0].Trim()
+    # Match first since it doesn't always appear
+    if ($WebRequest -match '<a href="\/collections\/.*?>'){
+        $Series = ((($WebRequest -split '<a href="\/collections\/.*?>')[1]) -split '<\/a>')[0].Trim()
     }
 
     Write-Output $Series

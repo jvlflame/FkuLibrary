@@ -2,10 +2,10 @@ function Get-FakkuURL {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
-        [String]$ComicName
+        [String]$Name
     )
 
-    $UrlName = $ComicName.ToLower()`
+    $UrlName = $Name.ToLower()`
         -replace '★', 'bzb' `
         -replace '☆', 'byb' `
         -replace '♪', 'bvb' `
@@ -13,11 +13,11 @@ function Get-FakkuURL {
         -replace '×', 'x' `
         -replace '\s+', ' '
 
-    # Matches "[Artist] ComicName (Comic XXX).ext" and extracts ComicName
+    # Matches "[Artist] Title (Comic XXX).ext" and extracts Title
     if ($UrlName -match '^\[.+?\].+\(.+?\)\.[a-z0-9]+$') {
         $UrlName = ((($UrlName -split "]")[1]) -split "\(")[0].Trim()
     }
-    # Matches "ComicName (Comic XXX).ext" and extracts ComicName
+    # Matches "Title (Comic XXX).ext" and extracts Title
     elseif ($UrlName -match '\(.+?\)\.[a-z0-9]+$') {
         $UrlName = ($UrlName -split "\(")[0].Trim()
     }
