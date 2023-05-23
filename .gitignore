@@ -1,5 +1,4 @@
-msedgedriver.exe
-chromedriver.exe
-geckodriver.exe
-WebDriver.dll
+*.exe
+*.dll
+*.lnk
 profiles/

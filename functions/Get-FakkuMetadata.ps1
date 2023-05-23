@@ -14,6 +14,9 @@ function Get-FakkuMetadata {
         [System.IO.DirectoryInfo]$UserProfile = (Join-Path -Path (Get-Item $PSScriptRoot).Parent -ChildPath "profiles"),
 
         [Parameter(Mandatory = $false, ParameterSetName = 'URL')]
+        [Switch]$Headless,
+
+        [Parameter(Mandatory = $false, ParameterSetName = 'URL')]
         [Switch]$Incognito
     )
 
@@ -58,6 +61,7 @@ function Get-FakkuMetadata {
                             $Driver = [OpenQA.Selenium.Edge.EdgeDriver]
                             $ProfilePath = Join-Path -Path $UserProfile -ChildPath "Edge"
                             $DriverOptions.AddArgument("user-data-dir=$ProfilePath")
+                            if ($Headless) {$DriverOptions.AddArgument("headless")}
                             if ($Incognito) {$DriverOptions.AddArgument("inprivate")}
                         }
                         'chromedriver.exe' {
@@ -66,15 +70,18 @@ function Get-FakkuMetadata {
                             $Driver = [OpenQA.Selenium.Chrome.ChromeDriver]
                             $ProfilePath = Join-Path -Path $UserProfile -ChildPath "Chrome"
                             $DriverOptions.AddArgument("user-data-dir=$ProfilePath")
+                            if ($Headless) {$DriverOptions.AddArgument("headless")}
                             if ($Incognito) {$DriverOptions.AddArgument("incognito")}
                         }
+                        # Untested, but I just hope it works lol.
                         'geckodriver.exe' {
                             $DriverOptions = New-Object OpenQA.Selenium.firefox.FirefoxOptions
                             $DriverService = [OpenQA.Selenium.firefox.FirefoxDriverService]::CreateDefaultService($WebDriverPath)
                             $Driver = [OpenQA.Selenium.firefox.FirefoxDriver]
                             $ProfilePath = Join-Path -Path $UserProfile -ChildPath "Firefox"
-                            $DriverOptions.AddArgument("profile $ProfilePath")
-                            if ($Incognito) {$DriverOptions.AddArgument("private")}
+                            $DriverOptions.AddArguments("profile $ProfilePath")
+                            if ($Headless) {$DriverOptions.AddArguments("headless")}
+                            if ($Incognito) {$DriverOptions.AddArguments("private")}
                         }
                         Default {
                             Write-Warning "Couldn't find compatible WebDriver executable."

@@ -105,6 +105,7 @@ Set-FakkuMetadata
 [`-Sleep`](#-sleep)
 [`-WebDriverPath`](#-webdriverpath)
 [`-UserProfile`](#-userprofile)
+[`-Headless`](#-headless)
 [`-Incognito`](#-incognito)
 
 #### Retrieve and write metadata to the console
@@ -119,6 +120,7 @@ Get-FakkuMetadata
 [`-Url`](#-url)
 [`-WebDriverPath`](#-webdriverpath)
 [`-UserProfile`](#-userprofile)
+[`-Headless`](#-headless)
 [`-Incognito`](#-incognito)
 
 #### Return corresponding FAKKU links for archive(s)
@@ -210,6 +212,9 @@ Get-FakkuMetadata "Bare Girl"
 
 - ##### `-UserProfile`
 > <sub>Specify path to save browser profiles to (default: `.\profiles`)</sub>
+
+- ##### `-Headless`
+> <sub>Launches browser in headless mode</sub>
 
 - ##### `-Incognito`
 > <sub>Launches browser in incognito/private mode</sub>

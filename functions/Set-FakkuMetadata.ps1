@@ -25,6 +25,9 @@ function Set-FakkuMetadata {
         [Parameter(Mandatory = $false)]
         [System.IO.DirectoryInfo]$UserProfile = (Join-Path -Path (Get-Item $PSScriptRoot).Parent -ChildPath "profiles"),
 
+        [Parameter(Mandatory = $false, ParameterSetName = 'URL')]
+        [Switch]$Headless,
+
         [Parameter(Mandatory = $false)]
         [Switch]$Incognito
     )
