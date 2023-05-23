@@ -20,21 +20,21 @@ function Get-FakkuMetadata {
     Switch ($PSCmdlet.ParameterSetName) {
         'Name' {
             try {
-                $FakkuURL = Get-FakkuURL -Name $Name
-                $WebRequest = (Invoke-WebRequest -Uri $FakkuURL -Method Get -Verbose:$false).Content
-                $XML = Get-MetadataXML -WebRequest $WebRequest -URL $FakkuURL
+                $FakkuUrl = Get-FakkuUrl -Name $Name
+                $WebRequest = (Invoke-WebRequest -Uri $FakkuUrl -Method Get -Verbose:$false).Content
+                $Xml = Get-MetadataXml -WebRequest $WebRequest -URL $FakkuUrl
             } catch {
                 Write-Warning "Work ""$Name"" not found."
                 return
             }
-            Write-Output $XML
+            Write-Output $Xml
         }
 
         'URL' {
             try {
                 if ($URL -match 'fakku') {
                     $WebRequest = (Invoke-WebRequest -Uri $URL -Method Get -Verbose:$false).Content
-                    $XML = Get-MetadataXML -WebRequest $WebRequest -URL $URL
+                    $Xml = Get-MetadataXml -WebRequest $WebRequest -URL $URL
                 } else {
                     Write-Warning "URL ""$URL"" is not a valid FAKKU URL."
                 }
@@ -92,14 +92,14 @@ function Get-FakkuMetadata {
                         [Void]$Host.UI.RawUI.ReadKey("NoEcho, IncludeKeyDown")
                     }
                     $WebDriver.Navigate().GoToURL($URL)
-                    $XML = Get-MetadataXML -WebRequest $WebDriver.PageSource -URL $URL
+                    $Xml = Get-MetadataXml -WebRequest $WebDriver.PageSource -URL $URL
                 }
                 catch {
                     Write-Warning "Error occurred while scraping ""$URL"": $PSItem"
                 }
             }
             if ($WebDriver) {$WebDriver.Quit()}
-            Write-Output $XML
+            Write-Output $Xml
         }
     }
 }

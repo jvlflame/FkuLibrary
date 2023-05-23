@@ -1,17 +1,17 @@
-function Set-MetadataXML {
+function Set-MetadataXml {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         [System.IO.FileInfo]$FilePath,
 
         [Parameter(Mandatory = $true)]
-        [System.IO.FileInfo]$XMLPath,
+        [System.IO.FileInfo]$XmlPath,
 
         [Parameter(Mandatory = $true)]
         [String]$Content
     )
 
-        Set-Content -LiteralPath $XMLPath -Value $Content -Force
+        Set-Content -LiteralPath $XmlPath -Value $Content -Force
 
         # Avoid errors with square brackets in file paths.
         if ($File.FullName -match "\[" -or $File.FullName -match "\]") {
@@ -21,7 +21,7 @@ function Set-MetadataXML {
             $TempName = $FilePath
         }
 
-    Compress-Archive -LiteralPath $XMLPath -DestinationPath $TempName -Update
-    Remove-Item -LiteralPath $XMLPath -Force
+    Compress-Archive -LiteralPath $XmlPath -DestinationPath $TempName -Update
+    Remove-Item -LiteralPath $XmlPath -Force
     Rename-Item -LiteralPath $TempName -NewName $FilePath
 }

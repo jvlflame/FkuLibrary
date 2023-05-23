@@ -5,10 +5,10 @@ function Get-FakkuVolume {
         [String]$WebRequest,
 
         [Parameter(Mandatory = $true)]
-        [String]$URL
+        [String]$Url
     )
 
-    $Subdirectory = ($URL -split 'fakku.net')[1]
+    $Subdirectory = ($Url -split 'fakku.net')[1]
     # Match first since it doesn't always appear
     if ($WebRequest -match "<a href=""$Subdirectory""") {
         $Vol = ($WebRequest -split "<a href=""$Subdirectory""")[0]

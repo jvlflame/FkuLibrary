@@ -99,7 +99,9 @@ Set-FakkuMetadata
 
 [`-FilePath`](#-filepath-positional)
 [`-Recurse`](#-recurse)
-[`-URL`](#-url)
+[`-Url`](#-url)
+[`-UrlFile`](#-urlfile)
+[`InputFile`](#-inputfile)
 [`-Sleep`](#-sleep)
 [`-WebDriverPath`](#-webdriverpath)
 [`-UserProfile`](#-userprofile)
@@ -114,7 +116,7 @@ Get-FakkuMetadata
 ###### Available parameters
 
 [`-Name`](#-name-positional)
-[`-URL`](#-url)
+[`-Url`](#-url)
 [`-WebDriverPath`](#-webdriverpath)
 [`-UserProfile`](#-userprofile)
 [`-Incognito`](#-incognito)
@@ -150,7 +152,19 @@ Set-FakkuMetadata -FilePath "C:\path\to\files"
 #### Set metadata for an archive from a FAKKU link
 
 ```sh
-Set-FakkuMetadata "C:\path\to\file.zip" -URL "https://www.fakku.net/hentai/Bare-Girl-english"
+Set-FakkuMetadata "C:\path\to\file.zip" -Url "https://www.fakku.net/hentai/Bare-Girl-english"
+```
+
+#### Set metadata for a list of archives
+
+```sh
+Set-FakkuMetadata -InputFile "C:\path\to\list\of\archives.txt"
+```
+
+#### Set metadata for archives in specified directory with a list of URLs
+
+```sh
+Set-FakkuMetadata "C:\path\to\files" -UrlFile "C:\path\to\list\of\urls.txt"
 ```
 
 #### Get metadata from a FAKKU link
@@ -166,36 +180,36 @@ Get-FakkuMetadata "Bare Girl"
 ```
 
 
-#### Set metadata for an archive while using WebDriver in incognito mode
-
-```sh
-Set-FakkuMetadata "C:\path\to\file\file.zip" -Incognito
-```
-
 <br/><br/>
 
 ## Parameter Descriptions
 
 - ##### `-FilePath` (positional)
-> Archive or directory or archives to set metadata for
+> <sub>Archive or directory or archives to set metadata for</sub>
 
 - ##### `-Name` (positional)
-> Work title to search FAKKU for
+> <sub>Work title to search FAKKU for</sub>
 
 - ##### `-Recurse`
-> If it should recursively search the directory for archives
+> <sub>If it should recursively search the directory for archives</sub>
 
-- ##### `-URL`
-> A FAKKU url to pull metadata from
+- ##### `-Url`
+> <sub>A FAKKU URL to pull metadata from</sub>
+
+- ##### `-UrlFile`
+> <sub>Specify a text file with FAKKU URLs to use for tagging (compatible with both `-FilePath` and `-InputFile`)</sub>
+
+- ##### `-InputFile`
+> <sub>Specify a text file with directories to tag</sub>
 
 - ##### `-Sleep`
-> Time to sleep between scrapes
+> <sub>Time to sleep between scrapes</sub>
 
 - ##### `-WebDriverPath`
-> Specifies path to `WebDriver.dll` and `driver.exe` (default: `.`)
+> <sub>Specify path to `WebDriver.dll` and `driver.exe` (default: `.`)</sub>
 
 - ##### `-UserProfile`
-> Specifies path to save browser profiles to (default: `.\profiles`)
+> <sub>Specify path to save browser profiles to (default: `.\profiles`)</sub>
 
 - ##### `-Incognito`
-> Launches browser in incognito/private mode
+> <sub>Launches browser in incognito/private mode</sub>

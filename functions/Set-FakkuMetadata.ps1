@@ -8,15 +8,21 @@ function Set-FakkuMetadata {
         [Switch]$Recurse,
 
         [Parameter(Mandatory = $false, ParameterSetName = 'File')]
-        [String]$URL,
+        [String]$Url,
 
         [Parameter(Mandatory = $false)]
         [Int32]$Sleep,
 
         [Parameter(Mandatory = $false)]
+        [System.IO.FileInfo]$UrlFile,
+
+        [Parameter(Mandatory = $true, ParameterSetName = 'Batch')]
+        [System.IO.FileInfo]$InputFile,
+
+        [Parameter(Mandatory = $false)]
         [System.IO.DirectoryInfo]$WebDriverPath = (Get-Item $PSScriptRoot).Parent,
 
-        [Parameter(Mandatory = $false, ParameterSetName = 'URL')]
+        [Parameter(Mandatory = $false)]
         [System.IO.DirectoryInfo]$UserProfile = (Join-Path -Path (Get-Item $PSScriptRoot).Parent -ChildPath "profiles"),
 
         [Parameter(Mandatory = $false)]
@@ -24,42 +30,70 @@ function Set-FakkuMetadata {
     )
 
     $ProgressPreference = 'SilentlyContinue'
-    Write-Host "Starting Fakku metadata scraper on path: $FilePath"
 
-    # Check if FilePath is a directory or file to determine how to proceed
-    if ((Get-Item -LiteralPath $FilePath) -is [System.IO.DirectoryInfo]) {
-        $Archive = Get-LocalArchives -FilePath $FilePath -Recurse:$Recurse
-    } else {
-        $Archive = Get-Item $FilePath
+    Switch ($PSCmdlet.ParameterSetName) {
+        'File' {
+            # Check if FilePath is a directory or file to determine how to proceed
+            if ((Get-Item -LiteralPath $FilePath) -is [System.IO.DirectoryInfo]) {
+                $Archive = Get-LocalArchives -FilePath $FilePath -Recurse:$Recurse
+            } else {
+                $Archive = Get-Item $FilePath
+            }
+
+            if ($PSBoundParameters.ContainsKey('Url')) {
+                if (Test-Path -Path $FilePath -PathType Container) {
+                    Write-Warning "URL parameter can only be used with an archive, not a directory."
+                    return
+                } elseif (-Not $Url -match 'fakku') {
+                    Write-Warning "URL ""$Url"" is not a valid FAKKU URL."
+                    return
+                }
+            }
+        }
+
+        'Batch' {
+            $Archive = Get-Content -Path $InputFile |
+                Where-Object { Test-Path -Path $_.trim().trim('"') } |
+                ForEach-Object { Get-Item -Path $_.trim().trim('"') }
+        }
     }
 
-    if ($PSBoundParameters.ContainsKey('URL')) {
-        if (Test-Path -Path $FilePath -PathType Container) {
-            Write-Warning "URL parameter can only be used with an archive, not a directory."
+    if ($PSBoundParameters.ContainsKey('UrlFile')) {
+        if ($Url) {
+            Write-Warning "URL parameter is not compatible with batch tagging."
             return
-        } elseif (-Not $URL -match 'fakku') {
-            Write-Warning "URL ""$URL"" is not a valid FAKKU URL."
+        }
+        $Links = Get-Content -Path $UrlFile | Where-Object { $_.trim() -match "fakku" }
+        if ($Links.Count -ne $Archive.Count) {
+            Write-Warning "File count does not equal URL count."
             return
         }
     }
+
 
     $Index = 1
     $TotalIndex = $Archive.Count
     foreach ($File in $Archive) {
         $Name = $File.BaseName
-        $XMLPath = Join-Path -Path $File.DirectoryName -ChildPath 'ComicInfo.xml'
+        $XmlPath = Join-Path -Path $File.DirectoryName -ChildPath 'ComicInfo.xml'
 
-        Write-Debug "$XMLPath"
+        Write-Debug "$XmlPath"
         Write-Host "[$Index of $TotalIndex] Setting metadata for ""$Name"""
 
         Start-Sleep -Seconds $Sleep
 
+        if ($Links) {
+            $FakkuUrl = $Links[$Index - 1] # Maybe not best practice
+        } else {
+            $FakkuUrl = $Url
+        }
+
         try {
-            if (!$URL) {$FakkuURL = Get-FakkuURL -Name $File.BaseName}
-            $WebRequest = (Invoke-WebRequest -Uri $FakkuURL -Method Get -Verbose:$false).Content
-            $XML = Get-MetadataXML -WebRequest $WebRequest -URL $FakkuURL
-            Set-MetadataXML -FilePath $File.FullName -XMLPath $XMLPath -Content $XML
-            Write-Verbose "Set $FilePath with $FakkuURL."
+            if (!$FakkuUrl) {$FakkuUrl = Get-FakkuUrl -Name $File.BaseName}
+            $WebRequest = (Invoke-WebRequest -Uri $FakkuUrl -Method Get -Verbose:$false).Content
+            $Xml = Get-MetadataXml -WebRequest $WebRequest -Url $FakkuUrl
+            Set-MetadataXml -FilePath $File.FullName -XmlPath $XmlPath -Content $Xml
+            Write-Verbose "Set $FilePath with $FakkuUrl."
         }
 
         # Fallback and use WebDriver
@@ -117,13 +151,12 @@ function Set-FakkuMetadata {
                     Write-Host "Please log into FAKKU then press any key to continue..."
                     [Void]$Host.UI.RawUI.ReadKey("NoEcho, IncludeKeyDown")
                 }
-                if (!$URL) {$FakkuURL = Get-FakkuURL -Name $File.BaseName}
-                $WebDriver.Navigate().GoToURL($FakkuURL)
-                $XML = Get-MetadataXML -WebRequest $WebDriver.PageSource -URL $FakkuURL
-                Set-MetadataXML -FilePath $File.FullName -XMLPath $XMLPath -Content $XML
-                Write-Verbose "Set $FilePath with $FakkuURL."
+                $WebDriver.Navigate().GoToURL($FakkuUrl)
+                $Xml = Get-MetadataXml -WebRequest $WebDriver.PageSource -Url $FakkuUrl
+                Set-MetadataXml -FilePath $File.FullName -XmlPath $XmlPath -Content $Xml
+                Write-Verbose "Set $FilePath with $FakkuUrl."
             } catch {
-                Write-Warning "Error occurred while scraping $FakkuURL : $PSItem"
+                Write-Warning "Error occurred while scraping $FakkuUrl : $PSItem"
             }
         }
         $Index++
