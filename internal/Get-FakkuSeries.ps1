@@ -5,11 +5,11 @@ function Get-FakkuSeries {
         [String]$WebRequest
     )
 
-    $Series = (((($WebRequest -split '<a.*magazines.*?>')[1]) -split '<\/a>')[0]).Trim()
+    $Series = ((($WebRequest -split '<a href="\/magazines\/.*?>')[1]) -split '<\/a>')[0].Trim()
 
     # Will use event instead if there is no magazine
     if ([string]::IsNullOrEmpty($Series)) {
-        $Series = (((($WebRequest -split '<a.*events.*?>')[1]) -split '<\/a>')[0]).Trim()
+        $Series = ((($WebRequest -split '<a href="\/events\/.*?>')[1]) -split '<\/a>')[0].Trim()
     }
 
     Write-Output $Series

@@ -5,9 +5,7 @@ function Get-FakkuArtist {
         [String]$WebRequest
     )
 
-    # Modified to account for multiple artists
-    $RawArtist = (((($WebRequest -split '<div.*>[Aa]rtist<\/div>')[1]) -split '<\/div>')[0]).Trim()
-
+    $RawArtist = ((($WebRequest -split '<div.*>[Aa]rtist<\/div>')[1]) -split '<\/div>')[0].Trim()
     $Artist = (($RawArtist -replace "`n","" -replace "`r","" |
     Select-String -Pattern '<a.*?artists.*?>(.*?(?=<))' -AllMatches).Matches |
     ForEach-Object { ($_.Groups[1].Value).Trim() }) -join ", "
