@@ -2,7 +2,11 @@
 
 Scrape metadata from FAKKU.net and build your own local FAKKU manga library with Komga or any other CMS that supports `ComicInfo.xml` metadata.
 
-```
+<details>
+
+ <summary>Example results</summary>
+
+ ```xml
 <?xml version="1.0"?>
 <ComicInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Title>Bare Girl</Title>
@@ -19,16 +23,23 @@ Scrape metadata from FAKKU.net and build your own local FAKKU manga library with
   <SeriesGroup>Comic Kairakuten BEAST 2017-03</SeriesGroup>
   <AgeRating>Adults Only 18+</AgeRating>
 </ComicInfo>
-```
+ ```
+![Image of the manga "Bare Girl" in Komga tagged with this tool.](/docs/images/komga.jpeg)
+ 
+</details>
+
+            [Getting Started](#getting-started) | [Setup](#setup) | [Usage](#usage) | [Examples](#examples) | [Parameter Descriptions](#parameter-descriptions)
+
+<br/><br/>
 
 ## Getting Started
 
-### Prerequisites
+#### Prerequisites
 
 - [PowerShell 5.0 or higher (6.0+ recommended)](https://aka.ms/powershell-release?tag=stable)
 - Komga or any other CMS that supports `ComicInfo.xml` metadata
 
-#### Accepted archive filenames
+#### Accepted archive filenames examples
 
 - `[Artist] Title (Comic XXX).ext`
 - `Title (Comic XXX).ext`
@@ -42,73 +53,156 @@ Scrape metadata from FAKKU.net and build your own local FAKKU manga library with
 - `.7z`
 - `.cb7.`
 
+<br/><br/>
+
 ## Setup
 
 #### Clone the repository
 
-- [Clone the repository](https://github.com/shrublet/fakku-meta-scraper/archive/refs/heads/main.zip) and extract the
-files to a directory of your choice.
+- [Clone the repository](https://github.com/shrublet/fakku-meta-scraper/archive/refs/heads/main.zip) and extract the files to a directory of your choice.
 
+#### Setup Selenium WebDriver (optional)
 
+- It's highly recommneded to setup and download Selenium as well to access publicly blocked pages. Download the WebDriver for your browser and the Selenium for C# package (linked below). Extract the WebDriver executable (for Google Chrome, this would be `chromedriver.exe`) and `WebDriver.dll` from the raw `.nupkg` package to either the root of your extracted repository (i.e. `.\fakku-meta-scraper-main`) or a directory of your choice.
 
-#### Setup Selenium WebDriver
+  - > <sub> ⚠️ The `WebDriver.dll` is packaged inside `.nupkg` file under `.\lib\net48\` and can be opened via any file archiver. Most Windows PCs should have .NET 4.8, so this is the recommended library. If the WebDriver isn't working as expected, ensure the version matches with your browser or try updating your browser/downgrading the WebDriver.</sub>
 
-- It's highly recommneded to setup and download Selenium as well to access publicly blocked pages. Download the WebDriver for your browser and the Selenium for C# package. Extract the WebDriver executable (for Google Chrome, this will be `chromedriver.exe`) and `WebDriver.dll` from the `.nupkg` package to either the root of the cloned repository (i.e. `.\fakku-meta-scraper\`) or a directory of your choice.
+  - [Browser WebDriver executables](https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/#quick-reference) [^1]
 
-> <sub>The `WebDriver.dll` is packaged inside `.nupkg` file under `.\lib\net48` and can be opened via any file archiver. Most Windows PCs should have .NET 4.8, so this is the recommended library. If the WebDriver isn't working as expected, ensure the version matches with your browser or try updating your browser/downgrading the WebDriver.</sub>
-
-<sub>[Browser WebDriver executables](https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/#quick-reference) [^1]</sub>
-
-<sup>[Selenium WebDriver for C#](https://www.nuget.org/packages/Selenium.WebDriver)</sup>
+  - [Selenium WebDriver for C#](https://www.nuget.org/packages/Selenium.WebDriver)
 
 [^1]: Currently only supports Google Chrome, Microsoft Edge, and Firefox.
 
 #### Import the module
 
-- You will need to do this every time you close your PowerShell window unless you add the module to
-your PowerShell module PATH
+- You will need to do this every time you close your PowerShell window unless you add the module to your PowerShell module PATH. Ensure that your PowerShell window is opened in the correct directory.
 
-```
-Import-Module Fakku-Scraper.psm1
+```sh
+cd "C:\path\to\extracted\repository"
 ```
 
-## Usage examples
+```sh
+Import-Module .\Fakku-Scraper.psm1
+```
+
+<br/><br/>
+
+## Usage
+
+#### Sets metadata for archive(s)
+
+```sh
+Set-FakkuMetadata
+```
+
+###### Available parameters
+
+[`-FilePath`](#-filepath-positional)
+[`-Recurse`](#-recurse)
+[`-URL`](#-url)
+[`-WebDriverPath`](#-webdriverpath)
+[`-Persist`](#-persist)
+[`-UserProfile`](#-userprofile)
+[`-Incognito`](#-incognito)
+
+#### Retrieves and writes metadata to the console
+
+```sh
+Get-FakkuMetadata
+```
+
+###### Available parameters
+
+[`-ComicName`](#-comicname-positional)
+[`-URL`](#-url)
+[`-WebDriverPath`](#-webdriverpath)
+[`-Persist`](#-persist)
+[`-UserProfile`](#-userprofile)
+[`-Incognito`](#-incognito)
+
+#### Returns corresponding FAKKU links for archive(s)
+
+```sh
+Get-FakkuLinks
+```
+
+###### Available parameters
+
+[`-FilePath`](#-filepath-positional)
+[`-ComicName`](#-comicname-positional)
+[`-Recurse`](#-recurse)
+
+<br/><br/>
+
+## Examples
 
 #### Set metadata for an archive
 
-```
+```sh
 Set-FakkuMetadata -FilePath "C:\path\to\file.zip"
 ```
 
-#### Set metadata for archives in specified filepath (supports recursion via `-Recurse`)
+#### Set metadata for archives in specified filepath
 
-```
-Set-FakkuMetadata -FilePath "C:\path\to\files\"
+```sh
+Set-FakkuMetadata -FilePath "C:\path\to\files"
 ```
 
 #### Set metadata for an archive from a FAKKU link
 
-```
-Set-FakkuMetadata -FilePath "C:\path\to\file.zip" -URL https://www.fakku.net/hentai/Bare-Girl-english
+```sh
+Set-FakkuMetadata "C:\path\to\file.zip" -URL "https://www.fakku.net/hentai/Bare-Girl-english"
 ```
 
 #### Get example metadata from a FAKKU link
 
-```
+```sh
 Get-FakkuMetadata https://www.fakku.net/hentai/Bare-Girl-english
 ```
 
 #### Get example metadata from a comic title
 
-```
+```sh
 Get-FakkuMetadata "Bare Girl"
 ```
 
 
 #### Set metadata for an archive while using WebDriver in incognito mode
 
-```
-Set-FakkuMetadata -FilePath "C:\path\to\file\file.zip" -Incognito
+```sh
+Set-FakkuMetadata "C:\path\to\file\file.zip" -Incognito
 ```
 
+#### Set metadata for an archive while using WebDriver with the default browser profile
 
+```sh
+Set-FakkuMetadata "C:\path\to\file\file.zip" -Profile "Default"
+```
+
+<br/><br/>
+
+## Parameter Descriptions
+
+- ##### `-FilePath` (positional)
+> Archive or directory or archives to set metadata for
+
+- ##### `-ComicName` (positional)
+> Work title to search FAKKU for
+
+- ##### `-Recurse`
+> If it should recursively search the directory for archives
+
+- ##### `-URL`
+> A FAKKU url to pull metadata from
+
+- ##### `-WebDriverPath`
+> Specifies path where `WebDriver.dll` and `driver.exe` are located (default: `.\fakku-meta-scraper`).
+
+- ##### `-Persist`
+> Keeps the WebDriver browser window open (useful for many invdidual scrapes)
+
+- ##### `-UserProfile`
+> Specify a browser profile to use (profile must not be in use or this option will not work)
+
+- ##### `-Incognito`
+> Launches WebDriver in incognito/private mode
