@@ -22,7 +22,7 @@ function Get-FakkuUrl {
         $UrlName = ($UrlName -split "\(")[0].Trim()
     }
 
-    $UrlName = ($UrlName -replace '[^-a-z0-9 ]+', '' -replace '\s', '-' -replace '-+', '-').Trim('-')
+    $UrlName = ($UrlName -replace '[^-a-z0-9]+', '' -replace '\s', '-' -replace '-+', '-').Trim('-')
     $FakkuUrl = "https://www.fakku.net/hentai/$UrlName-english"
 
     Write-Output $FakkuUrl
