@@ -51,7 +51,7 @@ Scrape metadata from FAKKU.net and build your own local FAKKU manga library with
 - `.rar`
 - `.cbr`
 - `.7z`
-- `.cb7.`
+- `.cb7`
 
 <br/><br/>
 
@@ -69,7 +69,7 @@ Scrape metadata from FAKKU.net and build your own local FAKKU manga library with
 
   - [Browser WebDriver executables](https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/#quick-reference) [^1]
 
-  - [Selenium WebDriver for C#](https://www.nuget.org/packages/Selenium.WebDriver)
+  - [Selenium WebDriver for C#](https://www.nuget.org/api/v2/package/Selenium.WebDriver)
 
 [^1]: Currently only supports Google Chrome, Microsoft Edge, and Firefox.
 
