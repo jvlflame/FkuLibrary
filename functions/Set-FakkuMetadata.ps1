@@ -35,7 +35,7 @@ function Set-FakkuMetadata {
         [Switch]$Log,
 
         [Parameter(Mandatory = $false)]
-        [System.IO.FileInfo]$LogPath = (Get-Item $PSScriptRoot).Parent
+        [System.IO.FileInfo]$LogPath = (Join-Path -Path (Get-Item $PSScriptRoot).Parent - ChildPath "fakku_library.log")
     )
 
     function Write-FakkuLog {
@@ -168,7 +168,7 @@ function Set-FakkuMetadata {
                     }
                     Default {
                         Write-Warning "Couldn't find compatible WebDriver executable."
-                        return
+                        break
                     }
                 }
 
@@ -199,7 +199,7 @@ function Set-FakkuMetadata {
 
                     $PandaUrl = Get-PandaURL -Name $WorkName
                     $WebRequest = Invoke-WebRequest -Uri $PandaUrl -Method Get -Verbose:$false
-                    $Xml = Get-MetadataXML -WebRequest $WebRequest.Content -Url $PandaUrl
+                    $Xml = Get-MetadataXML -WebRequest $WebRequest.Content -Url $PandaUrl -Provider "Panda"
                     Set-MetadataXML -FilePath $File.FullName -XmlPath $XmlPath -Content $Xml
 
                     Write-FakkuLog -Log:$Log -LogPath $LogPath -Source "Panda"

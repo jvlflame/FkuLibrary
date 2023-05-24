@@ -225,4 +225,4 @@ Get-FakkuMetadata "Bare Girl"
 > <sub>Whether or not logs should be written (default: False)</sub>
 
 - ##### `-LogPath`
-> <sub>Specify path to save log to (default: `.`)</sub>
+> <sub>Specify path to save log to (default: `.\fakku_library.log`)</sub>

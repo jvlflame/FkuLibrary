@@ -4,14 +4,14 @@ function Get-MetadataXML {
         [Parameter(Mandatory = $true)]
         [String]$WebRequest,
 
+        [Parameter(Mandatory = $true)]
+        [String]$Url,
+
         [Parameter(Mandatory = $false)]
         [ValidateSet('Fakku', 'Panda')]
-        [String]$Scraper = 'Fakku',
-
-        [Parameter(Mandatory = $true)]
-        [String]$Url
+        [String]$Provider = 'Fakku'
     )
-    switch ($Scraper) {
+    switch ($Provider) {
         'Fakku' {
             $Title = Get-FakkuTitle -Webrequest $WebRequest
             $Series = Get-FakkuSeries -WebRequest $WebRequest

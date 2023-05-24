@@ -1,19 +1,19 @@
 # Not updated- Just fixed formatting.
 
-function Get-PandaChaikaUrl {
+function Get-PandaUrl {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
-        [String]$WorkName
+        [String]$Name
     )
 
     $ProgressPreference = 'SilentlyContinue'
-    # $DoujinName = $DoujinName -replace '\p{S} ', 'bzb'
+    # $Name = $Name -replace '\p{S} ', 'bzb'
 
     # Match "[Artist] FileName (Comic XXX).ext"
-    if ($DoujinName -match '^\[(.*?)\](.*?)\((.*?)\)') {
-        $Artist = ((($DoujinName -split '\[(.*)\]')[1]) -replace ' ', '_').ToLower()
-        $Title = ((((((($DoujinName -split '\[(.*)\]')[2])`
+    if ($Name -match '^\[(.*?)\](.*?)\((.*?)\)') {
+        $Artist = ((($Name -split '\[(.*)\]')[1]) -replace ' ', '_').ToLower()
+        $Title = ((((((($Name -split '\[(.*)\]')[2])`
             -split '\(')[0]).Trim())`
             -replace '#', '%23')`
             -replace ' ', '+').ToLower()
@@ -22,9 +22,9 @@ function Get-PandaChaikaUrl {
     }
 
     # Match "[Artist] FileName.ext"
-    elseif ($DoujinName -match '^\[(.*?)\]') {
-        $Artist = ((($DoujinName -split '\[(.*)\]')[1]) -replace ' ', '_').ToLower()
-        $Title = ((((($DoujinName -split '\[(.*)\]')[2]).Trim())`
+    elseif ($Name -match '^\[(.*?)\]') {
+        $Artist = ((($Name -split '\[(.*)\]')[1]) -replace ' ', '_').ToLower()
+        $Title = ((((($Name -split '\[(.*)\]')[2]).Trim())`
             -replace '#', '%23')`
             -replace ' ', '+').ToLower()
 
@@ -32,9 +32,9 @@ function Get-PandaChaikaUrl {
     }
 
     # Match "FileName.ext"
-    elseif ($DoujinName -match '^[a-zA-Z0-9]') {
+    elseif ($Name -match '^[a-zA-Z0-9]') {
         $Artist = ''
-        $Title = ((($DoujinName.Trim()) -replace "#", '%23') -replace ' ', '+').ToLower()
+        $Title = ((($Name.Trim()) -replace "#", '%23') -replace ' ', '+').ToLower()
         $SearchURL = "https://panda.chaika.moe/search/?title=$Title"
     }
 
@@ -47,7 +47,7 @@ function Get-PandaChaikaUrl {
                     $WebRequest = Invoke-WebRequest -Uri "https://panda.chaika.moe$_" -Verbose:$false
                     $Results += [PSCustomObject]@{
                         PandaChaikaID = $_
-                        Publisher     = Get-PandaChaikaPublisher -Webrequest $WebRequest
+                        Publisher     = Get-PandaPublisher -Webrequest $WebRequest
                     }
                 }
 
