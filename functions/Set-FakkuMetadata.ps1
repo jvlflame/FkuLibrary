@@ -25,7 +25,7 @@ function Set-FakkuMetadata {
         [Parameter(Mandatory = $false)]
         [System.IO.DirectoryInfo]$UserProfile = (Join-Path -Path (Get-Item $PSScriptRoot).Parent -ChildPath "profiles"),
 
-        [Parameter(Mandatory = $false, ParameterSetName = 'URL')]
+        [Parameter(Mandatory = $false)]
         [Switch]$Headless,
 
         [Parameter(Mandatory = $false)]
@@ -52,7 +52,7 @@ function Set-FakkuMetadata {
                 Source   = $Source
             } | Export-Csv -Path $LogPath -Append
         }
-}
+    }
 
     $ProgressPreference = 'SilentlyContinue'
 
@@ -62,7 +62,7 @@ function Set-FakkuMetadata {
             if ((Get-Item -LiteralPath $FilePath) -is [System.IO.DirectoryInfo]) {
                 $Archive = Get-LocalArchives -FilePath $FilePath -Recurse:$Recurse
             } else {
-                $Archive = Get-Item $FilePath
+                $Archive = Get-Item -LiteralPath $FilePath
             }
 
             if ($PSBoundParameters.ContainsKey('Url')) {
