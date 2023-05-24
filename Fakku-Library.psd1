@@ -1,7 +1,7 @@
 @{
 
 # Script module or binary module file associated with this manifest.
-RootModule = 'Fakku-Scraper.psm1'
+RootModule = 'Fakku-Library.psm1'
 
 # Version number of this module.
 ModuleVersion = '0.0.1'
@@ -10,16 +10,16 @@ ModuleVersion = '0.0.1'
 # CompatiblePSEditions = @()
 
 # ID used to uniquely identify this module
-GUID = '441a0796-d97f-4dfd-8fa6-a6624dabb1a4'
+GUID = 'c5c1d085-4e5d-45c6-b640-a0e151eb'
 
 # Author of this module
-Author = 'Shrub'
+Author = 'jvlflame'
 
 # Company or vendor of this module
 CompanyName = 'Unknown'
 
 # Copyright statement for this module
-Copyright = '(c) Shrub. All rights reserved.'
+Copyright = '(c) jvlflame. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'Scrape metadata from FAKKU for your local collection!'

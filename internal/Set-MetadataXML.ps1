@@ -1,4 +1,4 @@
-function Set-MetadataXml {
+function Set-MetadataXML {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]

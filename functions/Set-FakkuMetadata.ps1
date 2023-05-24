@@ -29,8 +29,30 @@ function Set-FakkuMetadata {
         [Switch]$Headless,
 
         [Parameter(Mandatory = $false)]
-        [Switch]$Incognito
+        [Switch]$Incognito,
+
+        [Parameter(Mandatory = $false)]
+        [Switch]$Log,
+
+        [Parameter(Mandatory = $false)]
+        [System.IO.FileInfo]$LogPath = (Get-Item $PSScriptRoot).Parent
     )
+
+    function Write-FakkuLog {
+        param(
+            [Switch]$Log,
+            [System.IO.FileInfo]$LogPath,
+            [String]$Source
+        )
+
+        if ($Log) {
+            [PSCustomObject]@{
+                FilePath = $FilePath
+                Url      = $FakkuUrl
+                Source   = $Source
+            } | Export-Csv -Path $LogPath -Append
+        }
+}
 
     $ProgressPreference = 'SilentlyContinue'
 
@@ -77,12 +99,12 @@ function Set-FakkuMetadata {
     $Index = 1
     $TotalIndex = $Archive.Count
     foreach ($File in $Archive) {
-        $Name = $File.BaseName
+        $WorkName = $File.BaseName
         $XmlPath = Join-Path -Path $File.DirectoryName -ChildPath 'ComicInfo.xml'
+        # Clear-Variable -Name Xml, FakkuUrl
 
         Write-Debug "$XmlPath"
-        Write-Host "[$Index of $TotalIndex] Setting metadata for ""$Name"""
-
+        Write-Host "[$Index of $TotalIndex] Setting metadata for ""$WorkName"""
         Start-Sleep -Seconds $Sleep
 
         if ($Links) {
@@ -92,17 +114,21 @@ function Set-FakkuMetadata {
         }
 
         try {
-            if (!$FakkuUrl) {$FakkuUrl = Get-FakkuUrl -Name $File.BaseName}
+            if (!$FakkuUrl) {$FakkuUrl = Get-FakkuUrl -Name $WorkName}
             $WebRequest = (Invoke-WebRequest -Uri $FakkuUrl -Method Get -Verbose:$false).Content
-            $Xml = Get-MetadataXml -WebRequest $WebRequest -Url $FakkuUrl
-            Set-MetadataXml -FilePath $File.FullName -XmlPath $XmlPath -Content $Xml
+            $Xml = Get-MetadataXML -WebRequest $WebRequest -Url $FakkuUrl
+            Set-MetadataXML -FilePath $File.FullName -XmlPath $XmlPath -Content $Xml
+
+            Write-FakkuLog -Log:$Log -LogPath $LogPath -Source "FAKKU"
             Write-Verbose "Set $FilePath with $FakkuUrl."
+            Write-Debug "Set $File using FAKKU."
         }
 
-        # Fallback and use WebDriver
+        # WebDriver fallback
         catch {
             try {
-                Write-Host "Attempting to use browser..."
+                # TO-DO refactor WebDriver initialization into an internal function
+                Write-Debug "Starting WebDriver."
 
                 try {
                     Add-Type -Path (Get-Item (Join-Path -Path $WebDriverPath -ChildPath 'webdriver.dll'))
@@ -130,6 +156,7 @@ function Set-FakkuMetadata {
                         $DriverOptions.AddArgument("user-data-dir=$ProfilePath")
                         if ($Incognito) {$DriverOptions.AddArgument("incognito")}
                     }
+                    # Untested, but I just hope it works lol.
                     'geckodriver.exe' {
                         $DriverOptions = New-Object OpenQA.Selenium.firefox.FirefoxOptions
                         $DriverService = [OpenQA.Selenium.firefox.FirefoxDriverService]::CreateDefaultService($WebDriverPath)
@@ -150,16 +177,37 @@ function Set-FakkuMetadata {
                 # Initialize new WebDriver if can't find one
                 if (-Not $WebDriver.WindowHandles) {
                     $WebDriver = New-Object $Driver -ArgumentList @($DriverService, $DriverOptions)
-                    $WebDriver.Navigate().GoToURL("https://fakku.net/login")
-                    Write-Host "Please log into FAKKU then press any key to continue..."
-                    [Void]$Host.UI.RawUI.ReadKey("NoEcho, IncludeKeyDown")
+                    if (-Not $Headless) {
+                        $WebDriver.Navigate().GoToURL("https://fakku.net/login")
+                        Write-Host "Please log into FAKKU then press any key to continue..."
+                        [Void]$Host.UI.RawUI.ReadKey("NoEcho, IncludeKeyDown")
+                    }
                 }
                 $WebDriver.Navigate().GoToURL($FakkuUrl)
-                $Xml = Get-MetadataXml -WebRequest $WebDriver.PageSource -Url $FakkuUrl
-                Set-MetadataXml -FilePath $File.FullName -XmlPath $XmlPath -Content $Xml
+                $Xml = Get-MetadataXML -WebRequest $WebDriver.PageSource -Url $FakkuUrl
+                Set-MetadataXML -FilePath $File.FullName -XmlPath $XmlPath -Content $Xml
+
+                Write-FakkuLog -Log:$Log -LogPath $LogPath -Source "FAKKU"
                 Write-Verbose "Set $FilePath with $FakkuUrl."
-            } catch {
-                Write-Warning "Error occurred while scraping $FakkuUrl : $PSItem"
+                Write-Debug "Set $File using FAKKU."
+            }
+
+            # Panda fallback
+            catch {
+                try {
+                    Write-Debug "Falling back on Panda."
+
+                    $PandaUrl = Get-PandaURL -Name $WorkName
+                    $WebRequest = Invoke-WebRequest -Uri $PandaUrl -Method Get -Verbose:$false
+                    $Xml = Get-MetadataXML -WebRequest $WebRequest.Content -Url $PandaUrl
+                    Set-MetadataXML -FilePath $File.FullName -XmlPath $XmlPath -Content $Xml
+
+                    Write-FakkuLog -Log:$Log -LogPath $LogPath -Source "Panda"
+                    Write-Verbose "Set $FilePath with $PandaUrl"
+                    Write-Debug "Set $FilePath using Panda."
+                } catch {
+                    Write-Warning "Error occurred while scraping $FakkuUrl : $PSItem"
+                }
             }
         }
         $Index++

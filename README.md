@@ -1,4 +1,4 @@
-# FAKKU metadata scraper
+# FAKKU Library
 
 Scrape metadata from FAKKU.net and build your own local FAKKU manga library with Komga or any other CMS that supports `ComicInfo.xml` metadata.
 
@@ -25,7 +25,7 @@ Scrape metadata from FAKKU.net and build your own local FAKKU manga library with
 </ComicInfo>
  ```
 ![Image of the manga "Bare Girl" in Komga tagged with this tool.](/docs/images/komga.jpeg)
- 
+
 </details>
 
             [Getting Started](#getting-started) | [Setup](#setup) | [Usage](#usage) | [Examples](#examples) | [Parameter Descriptions](#parameter-descriptions)
@@ -82,7 +82,7 @@ cd "C:\path\to\extracted\repository"
 ```
 
 ```sh
-Import-Module .\Fakku-Scraper.psm1
+Import-Module .\Fakku-Library.psm1
 ```
 
 <br/><br/>
@@ -107,6 +107,8 @@ Set-FakkuMetadata
 [`-UserProfile`](#-userprofile)
 [`-Headless`](#-headless)
 [`-Incognito`](#-incognito)
+[`-Log`](#-log)
+[`-LogPath`](#-logpath)
 
 #### Retrieve and write metadata to the console
 
@@ -193,7 +195,7 @@ Get-FakkuMetadata "Bare Girl"
 > <sub>Work title to search FAKKU for</sub>
 
 - ##### `-Recurse`
-> <sub>If it should recursively search the directory for archives</sub>
+> <sub>If it should recursively search the directory for archives (default: False)</sub>
 
 - ##### `-Url`
 > <sub>A FAKKU URL to pull metadata from</sub>
@@ -205,7 +207,7 @@ Get-FakkuMetadata "Bare Girl"
 > <sub>Specify a text file with directories to tag</sub>
 
 - ##### `-Sleep`
-> <sub>Time to sleep between scrapes</sub>
+> <sub>Time to sleep between scrapes (default: 0)</sub>
 
 - ##### `-WebDriverPath`
 > <sub>Specify path to `WebDriver.dll` and `driver.exe` (default: `.`)</sub>
@@ -214,7 +216,13 @@ Get-FakkuMetadata "Bare Girl"
 > <sub>Specify path to save browser profiles to (default: `.\profiles`)</sub>
 
 - ##### `-Headless`
-> <sub>Launches browser in headless mode</sub>
+> <sub>Launches browser in headless mode (default: False)</sub>
 
 - ##### `-Incognito`
-> <sub>Launches browser in incognito/private mode</sub>
+> <sub>Launches browser in incognito/private mode (default: False)</sub>
+
+- ##### `-Log`
+> <sub>Whether or not logs should be written (default: False)</sub>
+
+- ##### `-LogPath`
+> <sub>Specify path to save log to (default: `.`)</sub>

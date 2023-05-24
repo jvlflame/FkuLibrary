@@ -73,7 +73,6 @@ function Get-FakkuMetadata {
                             if ($Headless) {$DriverOptions.AddArgument("headless")}
                             if ($Incognito) {$DriverOptions.AddArgument("incognito")}
                         }
-                        # Untested, but I just hope it works lol.
                         'geckodriver.exe' {
                             $DriverOptions = New-Object OpenQA.Selenium.firefox.FirefoxOptions
                             $DriverService = [OpenQA.Selenium.firefox.FirefoxDriverService]::CreateDefaultService($WebDriverPath)
@@ -91,15 +90,16 @@ function Get-FakkuMetadata {
 
                     $DriverService.SuppressInitialDiagnosticInformation = $true
                     $DriverService.HideCommandPromptWindow = $true
-                    # Initialize new WebDriver if can't find one
                     if (-Not $WebDriver.WindowHandles) {
                         $WebDriver = New-Object $Driver -ArgumentList @($DriverService, $DriverOptions)
-                        $WebDriver.Navigate().GoToURL("https://fakku.net/login")
-                        Write-Host "Please log into FAKKU then press any key to continue..."
-                        [Void]$Host.UI.RawUI.ReadKey("NoEcho, IncludeKeyDown")
+                        if (-Not $Headless) {
+                            $WebDriver.Navigate().GoToURL("https://fakku.net/login")
+                            Write-Host "Please log into FAKKU then press any key to continue..."
+                            [Void]$Host.UI.RawUI.ReadKey("NoEcho, IncludeKeyDown")
+                        }
                     }
                     $WebDriver.Navigate().GoToURL($URL)
-                    $Xml = Get-MetadataXml -WebRequest $WebDriver.PageSource -URL $URL
+                    $Xml = Get-MetadataXML -WebRequest $WebDriver.PageSource -URL $URL
                 }
                 catch {
                     Write-Warning "Error occurred while scraping ""$URL"": $PSItem"
